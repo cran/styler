@@ -27,7 +27,9 @@ all.equal(
 
 ## ------------------------------------------------------------------------
 space_after_opening_style <- function(are_you_sure) {
-  create_style_guide(space = if (are_you_sure) styler:::remove_space_after_opening_paren)
+  create_style_guide(space = tibble::lst(remove_space_after_opening_paren = 
+    if (are_you_sure) styler:::remove_space_after_opening_paren
+  ))
 }
 style_text("call( 1,1)", style = space_after_opening_style, are_you_sure = FALSE)  
 
@@ -66,7 +68,7 @@ set_line_break_before_curly_opening <- function(pd_flat) {
 
 ## ------------------------------------------------------------------------
 set_line_break_before_curly_opening_style <- function() {
-  create_style_guide(line_break = set_line_break_before_curly_opening)
+  create_style_guide(line_break = lst(set_line_break_before_curly_opening))
 }
 
 ## ------------------------------------------------------------------------

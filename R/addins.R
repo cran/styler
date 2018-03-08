@@ -18,6 +18,7 @@ NULL
 
 #' @describeIn styler_addins Styles the active file with [tidyverse_style()] and
 #'   `strict = TRUE`.
+#' @keywords internal
 style_active_file <- function() {
   transformer <- make_transformer(tidyverse_style())
   context <- get_rstudio_context()
@@ -30,7 +31,7 @@ style_active_file <- function() {
   }
   rstudioapi::modifyRange(
     c(1, 1, length(context$contents) + 1, 1),
-    paste0(out, collapse = "\n"), id = context$id
+    paste0(append(out, ""), collapse = "\n"), id = context$id
   )
   if (Sys.getenv("save_after_styling") == TRUE && context$path != "") {
     rstudioapi::documentSave(context$id)
@@ -46,6 +47,7 @@ style_active_file <- function() {
 #' @param context The context from `styler:::get_rstudio_context()`.
 #' @param transformer A transformer function most conveniently constructed with
 #'   [make_transformer()].
+#' @keywords internal
 try_transform_as_r_file <- function(context, transformer) {
   tryCatch(
     transformer(context$contents),
@@ -62,6 +64,7 @@ try_transform_as_r_file <- function(context, transformer) {
 
 #' @describeIn styler_addins Styles the highlighted selection in a `.R` or
 #'   `.Rmd` file.
+#' @keywords internal
 style_selection <- function() {
   context <- get_rstudio_context()
   text <- context$selection[[1]]$text
