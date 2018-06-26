@@ -1,4 +1,29 @@
-## styler 1.0.1 (2018-03-02)
+# styler 1.0.2 (2018-06-10)
+
+This is a maintenance release without any breaking API changes.
+
+## Major Changes
+
+* Fixed indention for named multi-line function calls (#372).
+* Non-R code chunks in `.Rmd` files are now respected and won't get styled 
+  (#386).
+
+## Minor Changes
+
+* Fixing an edge case in which, if very long strings were present in the code, 
+  tokens could be replaced with wrong text (#384).
+* Spacing around tilde in formulas depends now on whether there is a LHS 
+  in the formula (#379).
+* Spaces are now also added around `EQ_SUB` (`=`) (#380).
+* Added `CONTRIBUTING.md` to outline guidelines for contributing to styler.
+* More informative error messages for parsing problems (#401, #400).
+* Improved documentation (#387).
+
+Thanks to all contributors for patches, issues and the like: 
+@katrinleinweber, @krlmlr, @dchiu911, @ramnathv, @aedobbyn, @Bio7, 
+@tonytonov, @samhinshaw, @fny, @vnijs, @martin-mfg, @NGaffney, @dchiu911.
+
+# styler 1.0.1 (2018-03-02)
 
 This is a maintenance release without any breaking API changes.
 
@@ -16,13 +41,15 @@ This is a maintenance release without any breaking API changes.
 
 ## Minor changes
 
-* We're now recognizing and respecting DSLs used in R comments: rplumnber 
+* We're now recognizing and respecting more DSLs used in R comments: rplumber 
   (`#*`, #306), shebang `#/!` (#345), knitr chunk headers for spinning (`#+` / 
   `#-`, #362).
 * Named arguments can stay on the first line if call is multi-line (#318).
 * No space anymore with `tidyverse_style()` after `!!` since with `rlang 0.2`, 
   `!!` now binds tighter (#322), spacing around `~` (#316), no space anymore 
   around `^` (#308).
+* Code chunks in Rmd documents that don't use the R engine are no longer 
+  formatted (#313).
 * Various bug fixes and edge case improvements.
 
 Thanks to all contributors for patches, issues and the like: 
@@ -30,11 +57,11 @@ Thanks to all contributors for patches, issues and the like:
 @RMHogervorst, @wlandau, @llrs, @aaronrudkin, @crew102, @jkgrain, @jennybc, 
 @joranE.
 
-## styler 1.0.0 (2017-12-05)
+# styler 1.0.0 (2017-12-05)
 
 Initial release.
 
-### stylers
+## stylers
 These are functions used to style code. They style a directory, a whole package,
 a file or a string.
 ```
@@ -56,7 +83,7 @@ style_file(path,
 style_text(text, ..., style = tidyverse_style, transformers = style(...))
 ```
 
-### style guides
+## style guides
 These functions are the style guides implemented.
 ```
 tidyverse_style(
@@ -71,7 +98,7 @@ tidyverse_reindention()
 tidyverse_math_token_spacing())
 ```
 
-### style guide creators
+## style guide creators
 This function is used to create a style guide.
 ```
 create_style_guide(
@@ -85,7 +112,7 @@ create_style_guide(
 )
 ```
 
-### Helpers
+## Helpers
 These are helper functions used to specify the style guides in use.
 
 ```

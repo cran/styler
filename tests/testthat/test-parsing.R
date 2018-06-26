@@ -25,5 +25,38 @@ test_that("repreated parsing solves wrong parent assignment", {
 })
 
 test_that("long strings are parsed correctly", {
-  test_collection("parsing", "long_strings", transformer = style_text)
+  if (getRversion() < "3.2") skip("skip on R < 3.2 because of parsing problems")
+
+  expect_warning(
+    test_collection("parsing", "long_strings", transformer = style_text),
+    NA
+  )
+})
+
+test_that("issues with parsing long strings on R 3.1 can be detected", {
+  if (getRversion() >= "3.2") {
+    skip("skip on R >= 3.2 because parsing probmes don't appear")
+  }
+  expect_error(
+    test_collection("parsing", "long_strings", transformer = style_text),
+    "install R .* 3.2"
+  )
+})
+
+
+test_that("CRLF EOLs fail with informative error", {
+
+  expect_error(
+    style_text("glück <- 3\r\n glück + 1"),
+    "Please change the EOL character in your editor to Unix style and try again."
+  )
+  expect_error(
+    style_text(c("glück <- 3", "glück + 1\r\n 3")),
+    "Please change the EOL character in your editor to Unix style and try again."
+  )
+
+  expect_error(
+    style_text("a + 3 -4 -> x\nx + 2\r\n glück + 1"),
+    "unexpected input"
+  )
 })
