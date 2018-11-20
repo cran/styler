@@ -2,9 +2,10 @@
 % Please edit documentation in R/ui.R
 \name{style_file}
 \alias{style_file}
-\title{Style \code{.R} and/or \code{.Rmd} files}
+\title{Style \code{.R}, \code{.Rmd} or \code{.Rnw} files}
 \usage{
-style_file(path, ..., style = tidyverse_style, transformers = style(...))
+style_file(path, ..., style = tidyverse_style,
+  transformers = style(...), include_roxygen_examples = TRUE)
 }
 \arguments{
 \item{path}{A character vector with paths to files to style.}
@@ -19,11 +20,20 @@ further except to construct the argument \code{transformers}. See
 \item{transformers}{A set of transformer functions. This argument is most
 conveniently constructed via the \code{style} argument and \code{...}. See
 'Examples'.}
+
+\item{include_roxygen_examples}{Whether or not to style code in roxygen
+examples.}
 }
 \description{
 Performs various substitutions in the files specified.
 Carefully examine the results after running this function!
 }
+\section{Encoding}{
+
+UTF-8 encoding is assumed. Please convert your code to UTF-8 if necessary
+before applying styler.
+}
+
 \section{Value}{
 
 Invisibly returns a data frame that indicates for each file considered for
@@ -68,10 +78,10 @@ See section 'Warning' for a good strategy to apply styling safely.
 \examples{
 # the following is identical but the former is more convenient:
 file <- tempfile("styler", fileext = ".R")
-enc::write_lines_enc("1++1", file)
+xfun::write_utf8("1++1", file)
 style_file(file, style = tidyverse_style, strict = TRUE)
 style_file(file, transformers = tidyverse_style(strict = TRUE))
-enc::read_lines_enc(file)
+xfun::read_utf8(file)
 unlink(file)
 }
 \seealso{
@@ -79,3 +89,4 @@ Other stylers: \code{\link{style_dir}},
   \code{\link{style_pkg}}, \code{\link{style_text}},
   \code{\link{styler_addins}}
 }
+\concept{stylers}

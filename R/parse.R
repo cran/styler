@@ -23,7 +23,7 @@ parse_safely <- function(text, ...) {
   if (inherits(tried_parsing, "error")) {
     if (has_crlf_as_first_line_sep(tried_parsing$message, text)) {
       stop(
-        "The code to style seems to use Windows style line endings (CRLF). " ,
+        "The code to style seems to use Windows style line endings (CRLF). ",
         "styler currently only supports Unix style line endings (LF). ",
         "Please change the EOL character in your editor to Unix style and try again.",
         "\nThe parsing error was:\n", tried_parsing$message,
@@ -42,6 +42,7 @@ parse_safely <- function(text, ...) {
 #'
 #' @param message A message returned with `tryCatch()`.
 #' @param initial_text The inital text to style.
+#' @keywords internal
 has_crlf_as_first_line_sep <- function(message, initial_text) {
   split <- strsplit(message, ":", fixed = TRUE)[[1]]
   if (length(split) > 1L && split[1] == "<text>") {
@@ -49,7 +50,7 @@ has_crlf_as_first_line_sep <- function(message, initial_text) {
     offending_line <- initial_text[as.integer(split[2])]
     if (!is.na(offending_line)) {
       if (substr(offending_line, start_char, start_char + 1) == "\r\n") {
-      return(TRUE)
+        return(TRUE)
       }
     }
   }
@@ -90,8 +91,10 @@ get_parse_data <- function(text, include_text = TRUE, ...) {
   # avoid https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16041
   parse_safely(text, keep.source = TRUE)
   parsed <- parse_safely(text, keep.source = TRUE)
-  as_tibble(utils::getParseData(parsed, includeText = include_text)) %>%
+  pd <- as_tibble(utils::getParseData(parsed, includeText = include_text)) %>%
     add_id_and_short()
+  parser_version_set(parser_version_find(pd))
+  pd
 }
 
 #' Add column `pos_id` and `short`
@@ -171,7 +174,7 @@ ensure_valid_pd <- function(pd) {
     non_terminals <- pd %>%
       filter(terminal == FALSE)
     valid_pd <- non_terminals$id %>%
-      map_lgl(~ .x %in% pd$parent) %>%
+      map_lgl(~.x %in% pd$parent) %>%
       all()
     if (!valid_pd) {
       stop(paste(
@@ -190,7 +193,7 @@ ensure_valid_pd <- function(pd) {
 #' @details
 #' The meaning of the variable `is_problematic_string` in the source code
 #' changes from "all strings" to "all problematic strings", is partly
-#' missleading and this approach was chosen for performance reasons only.
+#' misleading and this approach was chosen for performance reasons only.
 #' @param pd A parse table.
 #' @param text The initial code to style.
 #' @keywords internal
@@ -211,5 +214,5 @@ lines_and_cols_match <- function(data) {
     two_cols_match,
     data = data
   ) %>%
-  all()
+    all()
 }

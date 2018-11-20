@@ -9,15 +9,15 @@
 #' Invisibly returns a data frame that indicates for each file considered for
 #' styling whether or not it was actually changed.
 #' @keywords internal
-transform_files <- function(files, transformers) {
-  transformer <- make_transformer(transformers)
+transform_files <- function(files, transformers, include_roxygen_examples) {
+  transformer <- make_transformer(transformers, include_roxygen_examples)
   max_char <- min(max(nchar(files), 0), 80)
   if (length(files) > 0L) {
     cat("Styling ", length(files), " files:\n")
   }
 
-  changed <- map_lgl(
-    files, transform_file, fun = transformer, max_char_path = max_char
+  changed <- map_lgl(files, transform_file,
+    fun = transformer, max_char_path = max_char
   )
   communicate_summary(changed, max_char)
   communicate_warning(changed, transformers)
@@ -26,19 +26,18 @@ transform_files <- function(files, transformers) {
 
 #' Transform a file and output a customized message
 #'
-#' Wraps `enc::transform_lines_enc()` and outputs customized messages.
+#' Transforms file contents and outputs customized messages.
 #' @param max_char_path The number of characters of the longest path. Determines
 #'   the indention level of `message_after`.
 #' @param message_before The message to print before the path.
 #' @param message_after The message to print after the path.
 #' @param message_after_if_changed The message to print after `message_after` if
 #'   any file was transformed.
-#' @inheritParams enc::transform_lines_enc
-#' @param ... Further arguments passed to `enc::transform_lines_enc()`.
+#' @inheritParams transform_utf8
+#' @param ... Further arguments passed to [transform_utf8()].
 #' @keywords internal
 transform_file <- function(path,
                            fun,
-                           verbose = FALSE,
                            max_char_path,
                            message_before = "",
                            message_after = " [DONE]",
@@ -49,24 +48,15 @@ transform_file <- function(path,
   n_spaces_before_message_after <-
     max_char_after_message_path - char_after_path
   cat(
-    message_before,
-    path,
-    rep_char(" ", max(0, n_spaces_before_message_after)),
+    message_before, path,
+    rep_char(" ", max(0L, n_spaces_before_message_after)),
     append = FALSE
   )
-  changed <- transform_code(path, fun = fun, verbose = verbose, ...)
+  changed <- transform_code(path, fun = fun, ...)
 
-  bullet <- ifelse(is.na(changed),
-    "warning",
-    ifelse(changed,
-      "info",
-      "tick"
-    )
-  )
+  bullet <- ifelse(is.na(changed), "warning", ifelse(changed, "info", "tick"))
 
-  cli::cat_bullet(
-    bullet = bullet
-  )
+  cli::cat_bullet(bullet = bullet)
   invisible(changed)
 }
 
@@ -77,13 +67,85 @@ transform_file <- function(path,
 #' that should be transformed.
 #' @param transformers A list of transformer functions that operate on flat
 #'   parse tables.
+#' @param include_roxygen_examples Whether or not to style code in roxygen
+#'   examples.
 #' @keywords internal
-make_transformer <- function(transformers) {
+#' @importFrom purrr when
+make_transformer <- function(transformers, include_roxygen_examples) {
   force(transformers)
   function(text) {
-    transformed_text <- parse_transform_serialize(text, transformers)
-    transformed_text
+    transformed_code <- text %>%
+      parse_transform_serialize_r(transformers) %>%
+      when(
+        include_roxygen_examples ~
+        parse_transform_serialize_roxygen(., transformers),
+        ~.
+      )
+    transformed_code
   }
+}
+
+#' Parse, transform and serialize roxygen comments
+#'
+#' Splits `text` into roxygen code examples and non-roxygen code examples and
+#' then maps over these examples by applying
+#' [style_roxygen_code_example()].
+#' @section Hierarchy:
+#' Styling involves splitting roxygen example code into segments, and segments
+#' into snippets. This describes the process for input of
+#' [parse_transform_serialize_roxygen()]:
+#'
+#' - Splitting code into roxygen example code and other code. Downstream,
+#'   we are only concerned about roxygen code. See
+#'   [parse_transform_serialize_roxygen()].
+#' - Every roxygen example code can have zero or more
+#'   dontrun / dontshow / donttest sequences. We next create segments of roxygen
+#'   code examples that contain at most one of these. See
+#'   [style_roxygen_code_example()].
+#' - We further split the segment that contains at most one dont* sequence into
+#'   snippets that are either don* or not. See
+#'   [style_roxygen_code_example_segment()].
+#'
+#' Finally, that we have roxygen code snippets that are either dont* or not,
+#' we style them in [style_roxygen_example_snippet()] using
+#' [parse_transform_serialize_r()].
+#' @importFrom purrr map_at flatten_chr
+#' @keywords internal
+parse_transform_serialize_roxygen <- function(text, transformers) {
+  roxygen_seqs <- identify_start_to_stop_of_roxygen_examples_from_text(text)
+  if (length(roxygen_seqs) < 1L) return(text)
+  split_segments <- split_roxygen_segments(text, unlist(roxygen_seqs))
+  map_at(split_segments$separated, split_segments$selectors,
+    style_roxygen_code_example,
+    transformers = transformers
+  ) %>%
+    flatten_chr()
+}
+
+#' Split text into roxygen and non-roxygen example segments
+#'
+#' @param text Roxygen comments
+#' @param roxygen_examples Integer sequence that indicates which lines in `text`
+#'   are roxygen examples. Most conveniently obtained with
+#'   [identify_start_to_stop_of_roxygen_examples_from_text].
+#' @return
+#' A list with two elements:
+#'
+#' * A list that contains elements grouped into roxygen and non-roxygen
+#'   sections. This list is named `separated`.
+#' * An integer vector with the indices that correspond to roxygen code
+#'   examples in `separated`.
+#' @importFrom rlang seq2
+#' @keywords internal
+split_roxygen_segments <- function(text, roxygen_examples) {
+  if (is.null(roxygen_examples)) return(lst(separated = list(text), selectors = NULL))
+  all_lines <- seq2(1L, length(text))
+  active_segment <- as.integer(all_lines %in% roxygen_examples)
+  segment_id <- cumsum(abs(c(0L, diff(active_segment)))) + 1L
+  separated <- split(text, factor(segment_id))
+  restyle_selector <- ifelse(roxygen_examples[1] == 1L, odd_index, even_index)
+
+  lst(separated, selectors = restyle_selector(separated))
 }
 
 #' Parse, transform and serialize text
@@ -91,8 +153,9 @@ make_transformer <- function(transformers) {
 #' Wrapper function for the common three operations.
 #' @inheritParams compute_parse_data_nested
 #' @inheritParams apply_transformers
+#' @seealso [parse_transform_serialize_roxygen()]
 #' @keywords internal
-parse_transform_serialize <- function(text, transformers) {
+parse_transform_serialize_r <- function(text, transformers) {
   text <- assert_text(text)
   pd_nested <- compute_parse_data_nested(text)
   start_line <- find_start_line(pd_nested)
@@ -108,9 +171,9 @@ parse_transform_serialize <- function(text, transformers) {
     enrich_terminals(transformers$use_raw_indention) %>%
     apply_ref_indention() %>%
     set_regex_indention(
-      pattern          = transformers$reindention$regex_pattern,
+      pattern = transformers$reindention$regex_pattern,
       target_indention = transformers$reindention$indention,
-      comments_only    = transformers$reindention$comments_only
+      comments_only = transformers$reindention$comments_only
     )
   serialized_transformed_text <-
     serialize_parse_data_flattened(flattened_pd, start_line = start_line)

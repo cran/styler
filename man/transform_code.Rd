@@ -2,23 +2,20 @@
 % Please edit documentation in R/transform-code.R
 \name{transform_code}
 \alias{transform_code}
-\title{Transform code from R or Rmd files}
+\title{Transform code from R, Rmd or Rnw files}
 \usage{
-transform_code(path, fun, verbose = FALSE, ...)
+transform_code(path, fun, ...)
 }
 \arguments{
-\item{path}{A vector of file paths.}
+\item{path}{A vector with file paths to transform.}
 
 \item{fun}{A function that returns a character vector.}
 
-\item{verbose}{Should the function show a message with a list of changed
-files?}
-
-\item{...}{Further arguments passed to \code{enc::transform_lines_enc()}.}
+\item{...}{Further arguments passed to \code{\link[=transform_utf8]{transform_utf8()}}.}
 }
 \description{
-A wrapper for \code{\link[enc:transform_lines_enc]{enc::transform_lines_enc()}} which initiates the styling of
-either R or Rmd files by passing the relevant transformer function for each
+A wrapper which initiates the styling of
+either R, Rmd or Rnw files by passing the relevant transformer function for each
 case.
 }
 \keyword{internal}

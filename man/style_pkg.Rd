@@ -6,7 +6,7 @@
 \usage{
 style_pkg(pkg = ".", ..., style = tidyverse_style,
   transformers = style(...), filetype = "R",
-  exclude_files = "R/RcppExports.R")
+  exclude_files = "R/RcppExports.R", include_roxygen_examples = TRUE)
 }
 \arguments{
 \item{pkg}{Path to a (subdirectory of an) R package.}
@@ -23,15 +23,18 @@ conveniently constructed via the \code{style} argument and \code{...}. See
 'Examples'.}
 
 \item{filetype}{Vector of file extensions indicating which file types should
-be styled. Case is ignored, and the \code{.} is optional, e.g. \code{c(".R", ".Rmd")}
-or \code{c("r", "rmd")}.}
+be styled. Case is ignored, and the \code{.} is optional, e.g. \code{c(".R", ".Rmd", ".Rnw")} or \code{c("r", "rmd", "rnw")}.}
 
 \item{exclude_files}{Character vector with paths to files that should be
 excluded from styling.}
+
+\item{include_roxygen_examples}{Whether or not to style code in roxygen
+examples.}
 }
 \description{
 Performs various substitutions in all \code{.R} files in a package
-(code and tests).
+(code and tests). One can also (optionally) style \code{.Rmd} and/or
+\code{.Rnw} files (vignettes and readme) by changing the \code{filetype} argument.
 Carefully examine the results after running this function!
 }
 \section{Warning}{
@@ -90,3 +93,4 @@ Other stylers: \code{\link{style_dir}},
   \code{\link{style_file}}, \code{\link{style_text}},
   \code{\link{styler_addins}}
 }
+\concept{stylers}

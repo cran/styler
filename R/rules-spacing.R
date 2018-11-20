@@ -35,10 +35,10 @@ style_space_around_math_token <- function(strict, zero, one, pd_flat) {
   pd_flat %>%
     style_space_around_token(
       strict = TRUE, tokens = zero, level_before = 0L, level_after = 0L
-  ) %>%
+    ) %>%
     style_space_around_token(
       strict = strict, tokens = one, level_before = 1L, level_after = 1L
-  )
+    )
 }
 
 #' Set spacing of token to a certain level
@@ -76,29 +76,17 @@ style_space_around_token <- function(pd_flat,
 style_space_around_tilde <- function(pd_flat, strict) {
   if (is_symmetric_tilde_expr(pd_flat)) {
     pd_flat <- style_space_around_token(pd_flat,
-       strict, "'~'", level_before = 1, level_after = 1
+      strict, "'~'",
+      level_before = 1, level_after = 1
     )
   } else if (is_asymmetric_tilde_expr(pd_flat)) {
     pd_flat <- style_space_around_token(pd_flat,
-      strict = TRUE, "'~'", level_before = 1, level_after = 0
+      strict = TRUE, "'~'", level_before = 1,
+      level_after = ifelse(nrow(pd_flat$child[[2]]) > 1, 1, 0)
     )
   }
   pd_flat
 }
-
-# depreciated!
-#' @include token-define.R
-#' @keywords internal
-remove_space_after_unary_pm <- function(pd_flat) {
-  op_pm <- c("'+'", "'-'")
-  op_pm_unary_after <- c(op_pm, op_token, "'('", "','")
-
-  pm_after <- pd_flat$token %in% op_pm
-  pd_flat$spaces[pm_after & (pd_flat$newlines == 0L) &
-    (lag(pd_flat$token) %in% op_pm_unary_after)] <- 0L
-  pd_flat
-}
-
 
 remove_space_after_unary_pm_nested <- function(pd) {
   if (any(pd$token[1] %in% c("'+'", "'-'"))) {
@@ -223,7 +211,8 @@ start_comments_with_space <- function(pd, force_one = FALSE) {
     "^(?<prefix>#+['\\*]*)(?<space_after_prefix> *)(?<text>.*)$"
   )
   comments$space_after_prefix <- nchar(
-    comments$space_after_prefix, type = "width"
+    comments$space_after_prefix,
+    type = "width"
   )
   comments$space_after_prefix <- set_spaces(
     spaces_after_prefix = comments$space_after_prefix,

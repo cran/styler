@@ -72,8 +72,8 @@ test_that("messages (via cat()) of style_file are correct", {
   temp_path <- copy_to_tempdir(testthat_file(
     "public-api", "xyzdir-dirty", "dirty-sample-with-scope-tokens.R"
   ))
-  expect_equal_to_reference(enc::to_utf8(capture.output(
-    style_file(temp_path, scope = "tokens"))),
+  expect_equal_to_reference(capture.output(
+    style_file(temp_path, scope = "tokens")),
     testthat_file("public-api/xyzdir-dirty/dirty-reference-with-scope-tokens")
   )
   unlink(dirname(temp_path))
@@ -81,7 +81,7 @@ test_that("messages (via cat()) of style_file are correct", {
   # No message if scope > line_breaks and code does not change
   temp_path <- copy_to_tempdir(testthat_file("public-api", "xyzdir-dirty", "clean-sample-with-scope-tokens.R"))
   expect_equal_to_reference(
-    enc::to_utf8(capture.output(style_file(temp_path, scope = "tokens"))),
+    capture.output(style_file(temp_path, scope = "tokens")),
     testthat_file("public-api/xyzdir-dirty/clean-reference-with-scope-tokens")
   )
   unlink(dirname(temp_path))
@@ -89,7 +89,7 @@ test_that("messages (via cat()) of style_file are correct", {
   # No message if scope <= line_breaks even if code is changed.
   temp_path <- copy_to_tempdir(testthat_file("public-api", "xyzdir-dirty", "dirty-sample-with-scope-spaces.R"))
   expect_equal_to_reference(
-    enc::to_utf8(capture.output(style_file(temp_path, scope = "spaces"))),
+    capture.output(style_file(temp_path, scope = "spaces")),
     testthat_file("public-api/xyzdir-dirty/dirty-reference-with-scope-spaces")
   )
   unlink(dirname(temp_path))
@@ -151,3 +151,58 @@ test_that("styler can style Rmd files only via style_pkg()", {
   expect_false(any(grepl("RcppExports.R", msg, fixed = TRUE)))
 })
 
+test_that("insufficient R version returns error", {
+  expect_error(stop_insufficient_r_version())
+})
+
+context("public API - Rnw in style_file()")
+
+test_that("styler can style Rnw file", {
+  capture_output(expect_false({
+    out <- style_file(
+      testthat_file("public-api", "xyzfile-rnw", "random.Rnw"), strict = FALSE
+    )
+    out$changed
+  }))
+
+  capture_output(expect_warning(
+    styled <- style_file(testthat_file("public-api", "xyzfile-rnw", "random2.Rnw"), strict = FALSE)
+  ))
+  expect_false(styled$changed)
+})
+
+test_that("styler handles malformed Rnw file and invalid R code in chunk", {
+  capture_output(expect_warning(
+    style_file(testthat_file("public-api", "xyzfile-rnw", "random3.Rnw"), strict = FALSE)
+  ))
+
+  capture_output(expect_warning(
+    style_file(testthat_file("public-api", "xyzfile-rnw", "random4.Rnw"), strict = FALSE)
+  ))
+})
+
+context("public API - Rnw in style_pkg()")
+
+test_that("styler can style R, Rmd and Rnw files via style_pkg()", {
+  msg <- capture_output(
+    style_pkg(testthat_file("public-api", "xyzpackage-rnw"),
+              filetype = c("R", "Rmd", "Rnw"))
+  )
+  expect_true(any(grepl("hello-world.R", msg, fixed = TRUE)))
+  expect_true(any(grepl("test-package-xyz.R", msg, fixed = TRUE)))
+  expect_true(any(grepl("random.Rmd", msg, fixed = TRUE)))
+  expect_true(any(grepl("random.Rnw", msg, fixed = TRUE)))
+  expect_false(any(grepl("RcppExports.R", msg, fixed = TRUE)))
+})
+
+test_that("styler can style Rnw files only via style_pkg()", {
+  msg <- capture_output(
+    style_pkg(testthat_file("public-api", "xyzpackage-rnw"),
+              filetype = "Rnw")
+  )
+  expect_false(any(grepl("hello-world.R", msg, fixed = TRUE)))
+  expect_false(any(grepl("test-package-xyz.R", msg, fixed = TRUE)))
+  expect_false(any(grepl("random.Rmd", msg, fixed = TRUE)))
+  expect_true(any(grepl("random.Rnw", msg, fixed = TRUE)))
+  expect_false(any(grepl("RcppExports.R", msg, fixed = TRUE)))
+})

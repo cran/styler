@@ -18,8 +18,8 @@ test_that("repreated parsing solves wrong parent assignment", {
     "R -q -e \"styler::style_file(\\\"", path_temp, "\\\")\""
   )
   calls_sys(sys_call, intern = FALSE, ignore.stdout = TRUE, ignore.stderr = TRUE)
-  ref <- enc::read_lines_enc(testthat_file("parsing", "repeated_parsing-out.R"))
-  result <- enc::read_lines_enc(path_temp)
+  ref <- xfun::read_utf8(testthat_file("parsing", "repeated_parsing-out.R"))
+  result <- xfun::read_utf8(path_temp)
   expect_equal(ref, result)
   unlink(dir)
 })
@@ -45,6 +45,7 @@ test_that("issues with parsing long strings on R 3.1 can be detected", {
 
 
 test_that("CRLF EOLs fail with informative error", {
+  skip_if(getRversion() < "3.4")
 
   expect_error(
     style_text("glück <- 3\r\n glück + 1"),
@@ -54,7 +55,10 @@ test_that("CRLF EOLs fail with informative error", {
     style_text(c("glück <- 3", "glück + 1\r\n 3")),
     "Please change the EOL character in your editor to Unix style and try again."
   )
+})
 
+
+test_that("mixed CRLF / LF EOLs fail", {
   expect_error(
     style_text("a + 3 -4 -> x\nx + 2\r\n glück + 1"),
     "unexpected input"

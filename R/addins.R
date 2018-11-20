@@ -20,22 +20,28 @@ NULL
 #'   `strict = TRUE`.
 #' @keywords internal
 style_active_file <- function() {
-  transformer <- make_transformer(tidyverse_style())
+  transformer <- make_transformer(tidyverse_style(),
+    include_roxygen_examples = TRUE
+  )
   context <- get_rstudio_context()
   if (is_rmd_file(context$path)) {
-    out <- transform_rmd(context$contents, transformer)
+    out <- transform_mixed(context$contents, transformer, filetype = "Rmd")
+  } else if (is_rnw_file(context$path)) {
+    out <- transform_mixed(context$contents, transformer, filetype = "Rnw")
   } else if (is_plain_r_file(context$path) | is_unsaved_file(context$path)) {
     out <- try_transform_as_r_file(context, transformer)
   } else {
-    stop("Can only style .R and .Rmd files.", call. = FALSE)
+    stop("Can only style .R, .Rmd and .Rnw files.", call. = FALSE)
   }
   rstudioapi::modifyRange(
     c(1, 1, length(context$contents) + 1, 1),
-    paste0(append(out, ""), collapse = "\n"), id = context$id
+    paste0(ensure_last_is_empty(out), collapse = "\n"),
+    id = context$id
   )
   if (Sys.getenv("save_after_styling") == TRUE && context$path != "") {
     rstudioapi::documentSave(context$id)
   }
+  rstudioapi::setCursorPosition(context$selection[[1]]$range)
 }
 
 #' Style a file as if it was an .R file
@@ -76,7 +82,8 @@ style_selection <- function() {
   if (all(nchar(text) == 0)) stop("No code selected")
   out <- style_text(text)
   rstudioapi::modifyRange(
-    context$selection[[1]]$range, paste0(out, collapse = "\n"), id = context$id
+    context$selection[[1]]$range, paste0(out, collapse = "\n"),
+    id = context$id
   )
   if (Sys.getenv("save_after_styling") == TRUE && context$path != "") {
     rstudioapi::documentSave(context$id)

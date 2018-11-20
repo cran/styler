@@ -26,7 +26,10 @@ flatten_operators <- function(pd_nested) {
 #' @keywords internal
 flatten_operators_one <- function(pd_nested) {
   pd_token_left <- c(special_token, math_token, "'$'")
-  pd_token_right <- c(special_token, "LEFT_ASSIGN", "'+'", "'-'")
+  pd_token_right <- c(
+    special_token, "LEFT_ASSIGN", if (parser_version_get() > 1) "EQ_ASSIGN",
+    "'+'", "'-'"
+  )
   bound <- pd_nested %>%
     flatten_pd(pd_token_left, left = TRUE) %>%
     flatten_pd(pd_token_right, left = FALSE)
@@ -125,8 +128,13 @@ wrap_expr_in_expr <- function(pd) {
 #' )
 #' @keywords internal
 relocate_eq_assign <- function(pd) {
-  pd %>%
-    post_visit(c(relocate_eq_assign_nest))
+  if (parser_version_get() < 2) {
+    pd %>%
+      post_visit(c(relocate_eq_assign_nest))
+  } else {
+    pd
+  }
+
 }
 
 
@@ -161,7 +169,6 @@ relocate_eq_assign_nest <- function(pd) {
   pd
 }
 
-
 #' Find the block to which a token belongs
 #'
 #' Two assignment tokens `EQ_ASSIGN` belong to the same block if they are not
@@ -172,7 +179,7 @@ relocate_eq_assign_nest <- function(pd) {
 #' @keywords internal
 find_block_id <- function(pd) {
   idx_eq_assign <- which(pd$token == "EQ_ASSIGN")
-  eq_belongs_to_block <- c(0, cumsum(diff(idx_eq_assign) > 2))
+  eq_belongs_to_block <- c(0, diff(idx_eq_assign) > 2)
 
   empty_seq <- rep(0, nrow(pd))
   empty_seq[idx_eq_assign - 1] <- eq_belongs_to_block

@@ -72,7 +72,6 @@ tidyverse_style <- function(scope = "tokens",
       indent_without_paren = partial(indent_without_paren,
         indent_by = indent_by
       ),
-      fix_quotes,
       remove_space_before_closing_paren,
       remove_space_before_opening_paren = if (strict) remove_space_before_opening_paren,
       add_space_after_for_if_while,
@@ -84,11 +83,12 @@ tidyverse_style <- function(scope = "tokens",
         math_token_spacing$one
       ),
       style_space_around_tilde = partial(
-        style_space_around_tilde, strict = strict
+        style_space_around_tilde,
+        strict = strict
       ),
       spacing_around_op = if (strict) {
         set_space_around_op
-      }else {
+      } else {
         add_space_around_op
       },
       spacing_around_comma = if (strict) {
@@ -120,6 +120,7 @@ tidyverse_style <- function(scope = "tokens",
 
   line_break_manipulators <- if (scope >= "line_breaks") {
     lst(
+      set_line_break_around_comma,
       remove_line_break_before_curly_opening,
       remove_line_break_before_round_closing_after_curly =
         if (strict) remove_line_break_before_round_closing_after_curly,
@@ -146,6 +147,7 @@ tidyverse_style <- function(scope = "tokens",
 
   token_manipulators <- if (scope >= "tokens") {
     lst(
+      fix_quotes,
       force_assignment_op,
       resolve_semicolon,
       add_brackets_in_pipe,
@@ -248,8 +250,8 @@ NULL
 #'   how.
 #' @examples
 #' style_text("a <- xyz", reindention = specify_reindention(
-#'   regex_pattern = "xyz", indention = 4, comments_only = FALSE)
-#' )
+#'   regex_pattern = "xyz", indention = 4, comments_only = FALSE
+#' ))
 #' @export
 specify_reindention <- function(regex_pattern = NULL,
                                 indention = 0,
@@ -285,7 +287,8 @@ character_to_ordered <- function(x, levels, name = substitute(x)) {
   if (!all((x %in% levels))) {
     stop(
       "all values in ", name, " must be one of the following: ",
-      paste(levels, collapse = ", "), call. = FALSE
+      paste(levels, collapse = ", "),
+      call. = FALSE
     )
   }
   factor(x, levels = levels, ordered = TRUE)
@@ -315,7 +318,7 @@ NULL
 #' @export
 specify_math_token_spacing <-
   function(zero = "'^'",
-           one = c("'+'", "'-'", "'*'", "'/'")) {
+             one = c("'+'", "'-'", "'*'", "'/'")) {
     assert_tokens(c(one, zero))
     lst(
       one = setdiff(c(math_token, one), zero),

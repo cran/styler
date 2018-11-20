@@ -4,7 +4,8 @@
 \alias{prettify_any}
 \title{Prettify R code in current working directory}
 \usage{
-prettify_any(transformers, filetype, recursive, exclude_files)
+prettify_any(transformers, filetype, recursive, exclude_files,
+  include_roxygen_examples)
 }
 \arguments{
 \item{transformers}{A set of transformer functions. This argument is most
@@ -12,14 +13,16 @@ conveniently constructed via the \code{style} argument and \code{...}. See
 'Examples'.}
 
 \item{filetype}{Vector of file extensions indicating which file types should
-be styled. Case is ignored, and the \code{.} is optional, e.g. \code{c(".R", ".Rmd")}
-or \code{c("r", "rmd")}.}
+be styled. Case is ignored, and the \code{.} is optional, e.g. \code{c(".R", ".Rmd", ".Rnw")} or \code{c("r", "rmd", "rnw")}.}
 
 \item{recursive}{A logical value indicating whether or not files in subdirectories
 should be styled as well.}
 
 \item{exclude_files}{Character vector with paths to files that should be
 excluded from styling.}
+
+\item{include_roxygen_examples}{Whether or not to style code in roxygen
+examples.}
 }
 \description{
 This is a helper function for style_dir.

@@ -8,17 +8,13 @@
 #' @param sub_test A regex pattern to further reduce the amount of test files
 #'   to be tested in the test. `sub_test` must match the beginning of file
 #'   names in tests/testthat. `NULL` matches all files.
-#' @details Each file name that matches `test` and `sub_test` and ends with
-#'   "-in.R" is considered as an input to test. Its counterpart,
-#'   the reference to compare it against is the *-out.R file. It is constructed
-#'   by taking the substring of the *-in.R file before the
-#'   first dash and adding -out.R. This allows for multiple in.R files to
-#'   share one out.R file. You could have one_line-out.R as the reference to
-#'   compare one_line-random-something-stuff-in.R and
-#'   one_line-random-but-not-so-much-in.R.
-#'
-#'   This also implies that -out.R files cannot have more than one dash in
-#'   their name, i.e. just the one before out.R.
+#' @details
+#' Each file name that matches `test` and `sub_test` and ends with
+#' "-in.R" is considered as an input to test. Its counterpart,
+#' the reference to compare it against is the *-out.R file. It is constructed
+#' by taking the substring of the *-in.R file before the
+#' last dash and adding -out.R. In contrast to older versions of this
+#' function, every *-out.R file has just one in file.
 #' @inheritParams transform_and_check
 #' @importFrom purrr flatten_chr pwalk map
 #' @keywords internal
@@ -31,7 +27,7 @@ test_collection <- function(test, sub_test = NULL,
 
   pattern <- paste0(
     if (!is.null(sub_test)) paste0("^", sub_test, ".*"),
-    "in\\.R(?:|md)$"
+    "in\\.R(?:|md|nw)$"
   )
 
   in_names <- list.files(
@@ -64,11 +60,13 @@ test_collection <- function(test, sub_test = NULL,
 #'   *-out.R file, everything after the first dash is replaced by *-out.R.
 #' @param in_paths A character vector that denotes paths to *-in.R files.
 #' @examples
-#' styler:::construct_out(c("path/to/file/first-in.R",
-#'  "path/to/file/first-extended-in.R"))
+#' styler:::construct_out(c(
+#'   "path/to/file/first-in.R",
+#'   "path/to/file/first-extended-in.R"
+#' ))
 #' @keywords internal
 construct_out <- function(in_paths) {
-  gsub("\\-.*([.]R(?:|md))$", "\\-out\\1", in_paths)
+  gsub("\\-in([.]R(?:|md|nw))$", "\\-out\\1", in_paths)
 }
 
 #' Construct paths of a tree object given the paths of *-in.R files
@@ -104,7 +102,7 @@ transform_and_check <- function(in_item, out_item,
                                 write_tree = NA,
                                 out_tree = "_tree", ...) {
   write_tree <- set_arg_write_tree(write_tree)
-  read_in <- enc::read_lines_enc(in_item)
+  read_in <- xfun::read_utf8(in_item)
   if (write_tree) {
     create_tree(read_in) %>%
       write.table(out_tree, col.names = FALSE, row.names = FALSE, quote = FALSE)
@@ -112,11 +110,10 @@ transform_and_check <- function(in_item, out_item,
   transformed_text <- read_in %>%
     transformer(...) %>%
     unclass()
-  transformed <- enc::transform_lines_enc(
+  transformed <- transform_utf8(
     out_item,
     function(x) transformed_text,
-    write_back = write_back,
-    verbose = FALSE
+    write_back = write_back
   )
 
   if (transformed) {
@@ -125,10 +122,7 @@ transform_and_check <- function(in_item, out_item,
       immediate. = TRUE, call. = FALSE
     )
   } else {
-    message(
-      in_name, " was identical to ", out_name,
-      immediate. = TRUE, call. = FALSE
-    )
+    message(in_name, " was identical to ", out_name)
   }
 }
 
@@ -165,7 +159,7 @@ style_empty <- function(text) {
     reindention       = specify_reindention(),
     NULL
   )
-  transformed_text <- parse_transform_serialize(text, transformers)
+  transformed_text <- parse_transform_serialize_r(text, transformers)
   transformed_text
 }
 
@@ -184,7 +178,7 @@ style_op <- function(text) {
     NULL
   )
 
-  transformed_text <- parse_transform_serialize(text, transformers)
+  transformed_text <- parse_transform_serialize_r(text, transformers)
   transformed_text
 }
 

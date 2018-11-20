@@ -6,7 +6,8 @@ NULL
 #' Prettify R source code
 #'
 #' Performs various substitutions in all `.R` files in a package
-#' (code and tests).
+#' (code and tests). One can also (optionally) style `.Rmd` and/or
+#' `.Rnw` files (vignettes and readme) by changing the `filetype` argument.
 #' Carefully examine the results after running this function!
 #'
 #' @param pkg Path to a (subdirectory of an) R package.
@@ -19,10 +20,12 @@ NULL
 #'   conveniently constructed via the `style` argument and `...`. See
 #'   'Examples'.
 #' @param filetype Vector of file extensions indicating which file types should
-#'   be styled. Case is ignored, and the `.` is optional, e.g. `c(".R", ".Rmd")`
-#'   or `c("r", "rmd")`.
+#'   be styled. Case is ignored, and the `.` is optional, e.g. `c(".R", ".Rmd",
+#'   ".Rnw")` or `c("r", "rmd", "rnw")`.
 #' @param exclude_files Character vector with paths to files that should be
 #'   excluded from styling.
+#' @param include_roxygen_examples Whether or not to style code in roxygen
+#'   examples.
 #' @section Warning:
 #' This function overwrites files (if styling results in a change of the
 #' code to be formatted). It is strongly suggested to only style files
@@ -69,15 +72,19 @@ style_pkg <- function(pkg = ".",
                       style = tidyverse_style,
                       transformers = style(...),
                       filetype = "R",
-                      exclude_files = "R/RcppExports.R") {
+                      exclude_files = "R/RcppExports.R",
+                      include_roxygen_examples = TRUE) {
   pkg_root <- rprojroot::find_package_root_file(path = pkg)
-  changed <- withr::with_dir(pkg_root,
-    prettify_pkg(transformers, filetype, exclude_files)
-  )
+  changed <- withr::with_dir(pkg_root, prettify_pkg(
+    transformers, filetype, exclude_files, include_roxygen_examples
+  ))
   invisible(changed)
 }
 
-prettify_pkg <- function(transformers, filetype, exclude_files) {
+prettify_pkg <- function(transformers,
+                         filetype,
+                         exclude_files,
+                         include_roxygen_examples) {
   filetype <- set_and_assert_arg_filetype(filetype)
   r_files <- vignette_files <- readme <- NULL
 
@@ -96,8 +103,18 @@ prettify_pkg <- function(transformers, filetype, exclude_files) {
     readme <- dir(pattern = "^readme\\.rmd$", ignore.case = TRUE)
   }
 
+  if ("\\.rnw" %in% filetype) {
+    vignette_files <- append(
+      vignette_files,
+      dir(
+        path = "vignettes", pattern = "\\.rnw$",
+        ignore.case = TRUE, recursive = TRUE, full.names = TRUE
+      )
+    )
+  }
+
   files <- setdiff(c(r_files, vignette_files, readme), exclude_files)
-  transform_files(files, transformers)
+  transform_files(files, transformers, include_roxygen_examples)
 }
 
 
@@ -121,15 +138,17 @@ prettify_pkg <- function(transformers, filetype, exclude_files) {
 style_text <- function(text,
                        ...,
                        style = tidyverse_style,
-                       transformers = style(...)) {
-  transformer <- make_transformer(transformers)
+                       transformers = style(...),
+                       include_roxygen_examples = TRUE) {
+  transformer <- make_transformer(transformers, include_roxygen_examples)
   styled_text <- transformer(text)
   construct_vertical(styled_text)
 }
 
 #' Prettify arbitrary R code
 #'
-#' Performs various substitutions in all `.R` files in a directory.
+#' Performs various substitutions in all `.R`, `.Rmd` and/or `.Rnw` files
+#' in a directory (by default only `.R` files are styled - see `filetype` argument).
 #' Carefully examine the results after running this function!
 #' @param path Path to a directory with files to transform.
 #' @param recursive A logical value indicating whether or not files in subdirectories
@@ -150,9 +169,12 @@ style_dir <- function(path = ".",
                       transformers = style(...),
                       filetype = "R",
                       recursive = TRUE,
-                      exclude_files = NULL) {
+                      exclude_files = NULL,
+                      include_roxygen_examples = TRUE) {
   changed <- withr::with_dir(
-    path, prettify_any(transformers, filetype, recursive, exclude_files)
+    path, prettify_any(
+      transformers, filetype, recursive, exclude_files, include_roxygen_examples
+    )
   )
   invisible(changed)
 }
@@ -164,18 +186,27 @@ style_dir <- function(path = ".",
 #' @param recursive A logical value indicating whether or not files in subdirectories
 #'   should be styled as well.
 #' @keywords internal
-prettify_any <- function(transformers, filetype, recursive, exclude_files) {
+prettify_any <- function(transformers,
+                         filetype,
+                         recursive,
+                         exclude_files,
+                         include_roxygen_examples) {
   files <- dir(
     path = ".", pattern = map_filetype_to_pattern(filetype),
     ignore.case = TRUE, recursive = recursive, full.names = TRUE
   )
-  transform_files(setdiff(files, exclude_files), transformers)
+  transform_files(
+    setdiff(files, exclude_files), transformers, include_roxygen_examples
+  )
 }
 
-#' Style `.R` and/or `.Rmd` files
+#' Style `.R`, `.Rmd` or `.Rnw` files
 #'
 #' Performs various substitutions in the files specified.
-#'   Carefully examine the results after running this function!
+#' Carefully examine the results after running this function!
+#' @section Encoding:
+#' UTF-8 encoding is assumed. Please convert your code to UTF-8 if necessary
+#' before applying styler.
 #' @param path A character vector with paths to files to style.
 #' @inheritParams style_pkg
 #' @inheritSection transform_files Value
@@ -184,20 +215,21 @@ prettify_any <- function(transformers, filetype, recursive, exclude_files) {
 #' @examples
 #' # the following is identical but the former is more convenient:
 #' file <- tempfile("styler", fileext = ".R")
-#' enc::write_lines_enc("1++1", file)
+#' xfun::write_utf8("1++1", file)
 #' style_file(file, style = tidyverse_style, strict = TRUE)
 #' style_file(file, transformers = tidyverse_style(strict = TRUE))
-#' enc::read_lines_enc(file)
+#' xfun::read_utf8(file)
 #' unlink(file)
 #' @family stylers
 #' @export
 style_file <- function(path,
                        ...,
                        style = tidyverse_style,
-                       transformers = style(...)) {
+                       transformers = style(...),
+                       include_roxygen_examples = TRUE) {
   changed <- withr::with_dir(
     dirname(path),
-    transform_files(basename(path), transformers)
+    transform_files(basename(path), transformers, include_roxygen_examples)
   )
   invisible(changed)
 }

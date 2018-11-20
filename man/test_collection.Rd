@@ -4,8 +4,8 @@
 \alias{test_collection}
 \title{Run a collection of tests}
 \usage{
-test_collection(test, sub_test = NULL, write_back = TRUE, write_tree = NA,
-  transformer, ...)
+test_collection(test, sub_test = NULL, write_back = TRUE,
+  write_tree = NA, transformer, ...)
 }
 \arguments{
 \item{test}{The test to run. It corresponds to a folder name in
@@ -36,12 +36,7 @@ Each file name that matches \code{test} and \code{sub_test} and ends with
 "-in.R" is considered as an input to test. Its counterpart,
 the reference to compare it against is the *-out.R file. It is constructed
 by taking the substring of the *-in.R file before the
-first dash and adding -out.R. This allows for multiple in.R files to
-share one out.R file. You could have one_line-out.R as the reference to
-compare one_line-random-something-stuff-in.R and
-one_line-random-but-not-so-much-in.R.
-
-This also implies that -out.R files cannot have more than one dash in
-their name, i.e. just the one before out.R.
+last dash and adding -out.R. In contrast to older versions of this
+function, every *-out.R file has just one in file.
 }
 \keyword{internal}
