@@ -14,7 +14,9 @@ add_space_around_op <- function(pd_flat) {
 #' @keywords internal
 set_space_around_op <- function(pd_flat) {
   op_after <- pd_flat$token %in% op_token
-  if (!any(op_after)) return(pd_flat)
+  if (!any(op_after)) {
+    return(pd_flat)
+  }
   op_before <- lead(op_after, default = FALSE)
   pd_flat$spaces[op_before & (pd_flat$newlines == 0L)] <- 1L
   pd_flat$spaces[op_after & (pd_flat$newlines == 0L)] <- 1L
@@ -96,22 +98,32 @@ remove_space_after_unary_pm_nested <- function(pd) {
   pd
 }
 
-
+#' Replace single quotes with double quotes
+#'
+#' We do not use `deparse()` as in previous implementations but `paste0()` since
+#' the former approach escapes the reverse backslash in the line break character
+#' `\\n` whereas the solution with `paste0()` does not.
+#' @examples
+#' style_text("'here
+#' is a string
+#' '")
+#' @importFrom purrr map map_chr
+#' @param pd_flat A flat parse table.
+#' @keywords internal
 fix_quotes <- function(pd_flat) {
   str_const <- pd_flat$token == "STR_CONST"
   str_const_change <- grepl("^'([^\"]*)'$", pd_flat$text[str_const])
   pd_flat$text[str_const][str_const_change] <-
-    vapply(
-      lapply(pd_flat$text[str_const][str_const_change], parse_text),
-      deparse,
-      character(1L)
-    )
+    map(pd_flat$text[str_const][str_const_change], parse_text) %>%
+    map_chr(~ paste0("\"", .x, "\""))
   pd_flat
 }
 
 remove_space_before_opening_paren <- function(pd_flat) {
   paren_after <- pd_flat$token == "'('"
-  if (!any(paren_after)) return(pd_flat)
+  if (!any(paren_after)) {
+    return(pd_flat)
+  }
   paren_before <- lead(paren_after, default = FALSE)
   pd_flat$spaces[paren_before & (pd_flat$newlines == 0L)] <- 0L
   pd_flat
@@ -119,14 +131,18 @@ remove_space_before_opening_paren <- function(pd_flat) {
 
 remove_space_after_opening_paren <- function(pd_flat) {
   paren_after <- pd_flat$token == "'('"
-  if (!any(paren_after)) return(pd_flat)
+  if (!any(paren_after)) {
+    return(pd_flat)
+  }
   pd_flat$spaces[paren_after & (pd_flat$newlines == 0L)] <- 0L
   pd_flat
 }
 
 remove_space_before_closing_paren <- function(pd_flat) {
   paren_after <- pd_flat$token == "')'"
-  if (!any(paren_after)) return(pd_flat)
+  if (!any(paren_after)) {
+    return(pd_flat)
+  }
   paren_before <- lead(paren_after, default = FALSE)
   pd_flat$spaces[paren_before & (pd_flat$newlines == 0L)] <- 0L
   pd_flat
@@ -134,7 +150,9 @@ remove_space_before_closing_paren <- function(pd_flat) {
 
 add_space_after_for_if_while <- function(pd_flat) {
   comma_after <- pd_flat$token %in% c("FOR", "IF", "WHILE")
-  if (!any(comma_after)) return(pd_flat)
+  if (!any(comma_after)) {
+    return(pd_flat)
+  }
   idx <- comma_after & (pd_flat$newlines == 0L)
   pd_flat$spaces[idx] <- pmax(pd_flat$spaces[idx], 1L)
   pd_flat
@@ -142,7 +160,9 @@ add_space_after_for_if_while <- function(pd_flat) {
 
 add_space_before_brace <- function(pd_flat) {
   op_after <- pd_flat$token %in% "'{'"
-  if (!any(op_after)) return(pd_flat)
+  if (!any(op_after)) {
+    return(pd_flat)
+  }
   op_before <- lead(op_after, default = FALSE)
   idx_before <- op_before & (pd_flat$newlines == 0L) & pd_flat$token != "'('"
   pd_flat$spaces[idx_before] <- pmax(pd_flat$spaces[idx_before], 1L)
@@ -163,7 +183,9 @@ set_space_after_comma <- function(pd_flat) {
 
 remove_space_before_comma <- function(pd_flat) {
   comma_after <- pd_flat$token == "','"
-  if (!any(comma_after)) return(pd_flat)
+  if (!any(comma_after)) {
+    return(pd_flat)
+  }
   comma_before <- lead(comma_after, default = FALSE)
   idx <- comma_before & (pd_flat$newlines == 0L)
   pd_flat$spaces[idx] <- 0L
@@ -185,7 +207,7 @@ set_space_between_levels <- function(pd_flat) {
     index <- pd_flat$token == "')'" & pd_flat$newlines == 0L
     pd_flat$spaces[index] <- 1L
   } else if (pd_flat$token[1] == "FOR") {
-    index <- 2
+    index <- pd_flat$token == "forcond" & pd_flat$newlines == 0
     pd_flat$spaces[index] <- 1L
   }
   pd_flat
@@ -204,7 +226,9 @@ set_space_between_levels <- function(pd_flat) {
 #' @keywords internal
 start_comments_with_space <- function(pd, force_one = FALSE) {
   comment_pos <- is_comment(pd) & !is_shebang(pd) & !is_code_chunk_header(pd)
-  if (!any(comment_pos)) return(pd)
+  if (!any(comment_pos)) {
+    return(pd)
+  }
 
   comments <- rematch2::re_match(
     pd$text[comment_pos],
@@ -233,7 +257,9 @@ start_comments_with_space <- function(pd, force_one = FALSE) {
 
 set_space_before_comments <- function(pd_flat) {
   comment_after <- (pd_flat$token == "COMMENT") & (pd_flat$lag_newlines == 0L)
-  if (!any(comment_after)) return(pd_flat)
+  if (!any(comment_after)) {
+    return(pd_flat)
+  }
   comment_before <- lead(comment_after, default = FALSE)
   pd_flat$spaces[comment_before & (pd_flat$newlines == 0L)] <- 1L
   pd_flat
@@ -241,7 +267,9 @@ set_space_before_comments <- function(pd_flat) {
 
 add_space_before_comments <- function(pd_flat) {
   comment_after <- (pd_flat$token == "COMMENT") & (pd_flat$lag_newlines == 0L)
-  if (!any(comment_after)) return(pd_flat)
+  if (!any(comment_after)) {
+    return(pd_flat)
+  }
   comment_before <- lead(comment_after, default = FALSE)
   pd_flat$spaces[comment_before & (pd_flat$newlines == 0L)] <-
     pmax(pd_flat$spaces[comment_before], 1L)

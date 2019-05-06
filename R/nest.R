@@ -58,7 +58,7 @@ add_terminal_token_after <- function(pd_flat) {
     filter(terminal) %>%
     arrange(pos_id)
 
-  data_frame(pos_id = terminals$pos_id, token_after = lead(terminals$token, default = "")) %>%
+  tibble(pos_id = terminals$pos_id, token_after = lead(terminals$token, default = "")) %>%
     left_join(pd_flat, ., by = "pos_id")
 }
 
@@ -69,7 +69,7 @@ add_terminal_token_before <- function(pd_flat) {
     filter(terminal) %>%
     arrange(pos_id)
 
-  data_frame(
+  tibble(
     id = terminals$id,
     token_before = lag(terminals$token, default = "")
   ) %>%
@@ -119,7 +119,9 @@ set_spaces <- function(spaces_after_prefix, force_one) {
 #' @importFrom purrr map2
 #' @keywords internal
 nest_parse_data <- function(pd_flat) {
-  if (all(pd_flat$parent <= 0)) return(pd_flat)
+  if (all(pd_flat$parent <= 0)) {
+    return(pd_flat)
+  }
   pd_flat$internal <- with(pd_flat, (id %in% parent) | (parent <= 0))
   split_data <- split(pd_flat, pd_flat$internal)
 
@@ -152,7 +154,9 @@ nest_parse_data <- function(pd_flat) {
 #' @keywords internal
 combine_children <- function(child, internal_child) {
   bound <- bind_rows(child, internal_child)
-  if (nrow(bound) == 0) return(NULL)
+  if (nrow(bound) == 0) {
+    return(NULL)
+  }
   bound[order(bound$pos_id), ]
 }
 

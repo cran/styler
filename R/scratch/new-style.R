@@ -14,7 +14,6 @@ tidyverse_with_pipe_expection_style <- function(..., strict = TRUE) {
     }
     pd
   }
-  browser()
   tidy_style_guide$line_break$style_line_break_around_curly <-
     purrr::partial(style_line_break_around_curly, strict = strict)
   tidy_style_guide

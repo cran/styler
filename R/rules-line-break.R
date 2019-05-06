@@ -6,12 +6,13 @@ remove_line_break_before_curly_opening <- function(pd) {
 }
 
 set_line_break_around_comma <- function(pd) {
-  comma_with_line_break_before <-
+  comma_with_line_break_that_can_be_removed_before <-
     (pd$token == "','") &
       (pd$lag_newlines > 0) &
-      (pd$token_before != "COMMENT")
-  pd$lag_newlines[comma_with_line_break_before] <- 0L
-  pd$lag_newlines[lead(comma_with_line_break_before)] <- 1L
+      (pd$token_before != "COMMENT") &
+      (lag(pd$token) != "'['")
+  pd$lag_newlines[comma_with_line_break_that_can_be_removed_before] <- 0L
+  pd$lag_newlines[lag(comma_with_line_break_that_can_be_removed_before)] <- 1L
   pd
 }
 
@@ -47,9 +48,10 @@ remove_line_break_before_round_closing_fun_dec <- function(pd) {
 
 #' @importFrom rlang seq2
 add_line_break_after_pipe <- function(pd) {
-  is_special <- pd$token == c("SPECIAL-PIPE") & pd$token_after != "COMMENT"
-  if (any(pd$lag_newlines != 0L)) {
-    pd$lag_newlines[lag(is_special)] <- 1L
+  is_pipe <- pd$token == c("SPECIAL-PIPE") & pd$token_after != "COMMENT"
+  if (sum(is_pipe) > 1 &&
+      !(next_terminal(pd, vars = "token_before")$token_before %in% c("'('", "EQ_SUB", "','"))) {
+    pd$lag_newlines[lag(is_pipe)] <- 1L
   }
   pd
 }
@@ -75,7 +77,9 @@ set_line_break_after_opening_if_call_is_multi_line <-
   function(pd,
              except_token_after = NULL,
              except_text_before = NULL) {
-    if (!is_function_call(pd) && !is_subset_expr(pd)) return(pd)
+    if (!is_function_call(pd) && !is_subset_expr(pd)) {
+      return(pd)
+    }
     npd <- nrow(pd)
     seq_x <- seq2(3L, npd - 1L)
     is_multi_line <- any(
@@ -114,7 +118,9 @@ find_line_break_position_in_multiline_call <- function(pd) {
 #'   closing parenthesis.
 #' @keywords internal
 set_line_break_before_closing_call <- function(pd, except_token_before) {
-  if (!is_function_call(pd) && !is_subset_expr(pd)) return(pd)
+  if (!is_function_call(pd) && !is_subset_expr(pd)) {
+    return(pd)
+  }
   npd <- nrow(pd)
   is_multi_line <- any(pd$lag_newlines[seq2(3L, npd - 1L)] > 0)
   if (!is_multi_line) {

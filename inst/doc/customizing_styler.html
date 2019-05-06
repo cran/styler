@@ -18,10 +18,10 @@
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
+<style type="text/css" data-origin="pandoc">
 a.sourceLine { display: inline-block; line-height: 1.25; }
 a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
+a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -34,13 +34,11 @@ code.sourceCode { white-space: pre-wrap; }
 a.sourceLine { text-indent: -1em; padding-left: 1em; }
 }
 pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
+  { position: relative; left: -4em; }
 pre.numberSource a.sourceLine::before
   { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -82,7 +80,29 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
 </style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -270,6 +290,9 @@ code > span.al { color: #ff0000; font-weight: bold; }
 code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
+
+
+
 </head>
 
 <body>
@@ -278,8 +301,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 
 <h1 class="title toc-ignore">Customizing styler</h1>
-<h4 class="author"><em>Lorenz Walthert</em></h4>
-<h4 class="date"><em>8/10/2017</em></h4>
+<h4 class="author">Lorenz Walthert</h4>
+<h4 class="date">8/10/2017</h4>
 
 
 
@@ -319,12 +342,13 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <pre><code>## function (pd_flat) 
 ## {
 ##     paren_after &lt;- pd_flat$token == &quot;'('&quot;
-##     if (!any(paren_after)) 
+##     if (!any(paren_after)) {
 ##         return(pd_flat)
+##     }
 ##     pd_flat$spaces[paren_after &amp; (pd_flat$newlines == 0L)] &lt;- 0L
 ##     pd_flat
 ## }
-## &lt;bytecode: 0x7fda9371c478&gt;
+## &lt;bytecode: 0x7fb063910f10&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>As the name says, this function removes spaces after the opening parenthesis. But how? Its input is a <em>nest</em>. Since the visitor will go through all levels of nesting, we just need a function that can be applied to a <em>nest</em>, that is, to a parse table at one level of nesting. We can compute the nested parse table and look at one of the levels of nesting that is interesting for us (more on the data structure in the vignettes “Data structures” and “Manipulating the parse table”):</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">string_to_format &lt;-<span class="st"> &quot;call( 3)&quot;</span></a>
@@ -387,10 +411,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1">styler<span class="op">:::</span>apply_transformers</a></code></pre></div>
 <pre><code>## function (pd_nested, transformers) 
 ## {
-##     transformed_line_breaks &lt;- pre_visit(pd_nested, c(transformers$initialize, 
-##         transformers$line_break))
-##     transformed_updated_multi_line &lt;- post_visit(transformed_line_breaks, 
-##         c(set_multi_line, update_newlines))
+##     transformed_updated_multi_line &lt;- post_visit(pd_nested, c(transformers$initialize, 
+##         transformers$line_break, set_multi_line, update_newlines))
 ##     transformed_all &lt;- pre_visit(transformed_updated_multi_line, 
 ##         c(transformers$space, transformers$indention, transformers$token))
 ##     transformed_absolute_indent &lt;- context_to_terminals(transformed_all, 
@@ -398,7 +420,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ##         outer_indention_refs = NA)
 ##     transformed_absolute_indent
 ## }
-## &lt;bytecode: 0x7fda93e769f0&gt;
+## &lt;bytecode: 0x7fb06382c748&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>This means that the order of the styling is clearly defined and it is for example not possible to modify line breaks based on spacing, because spacing will be set after line breaks are set. Do not rely on the column <code>col1</code>, <code>col2</code>, <code>line1</code> and <code>line2</code> in the parse table in any of your functions since these columns only reflect the position of tokens at the point of parsing, i.e. they are not kept up to date throughout the process of styling.</p>
 <p>Also, as indicated above, work with <code>lag_newlines</code> only in your line break rules. For development purposes, you may also want to use the unexported function <code>test_collection()</code> to help you with testing your style guide. You can find more information in the help file for the function.</p>
@@ -448,7 +470,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 1     9     11     1    24     1    24     19 '{'   TRUE     {     {    
 ## 2    16     12     1    26     1    30     19 expr  FALSE    &quot;&quot;    &quot;&quot;   
 ## 3    15     18     1    32     1    32     19 '}'   TRUE     }     }    
-## # ... with 4 more variables: token_before &lt;chr&gt;, token_after &lt;chr&gt;,
+## # … with 4 more variables: token_before &lt;chr&gt;, token_after &lt;chr&gt;,
 ## #   internal &lt;lgl&gt;, child &lt;list&gt;</code></pre>
 <p>Remember what we said above: A transformer takes a flat parse table as input, updates it and returns it. So here it’s actually simple:</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1">set_line_break_before_curly_opening &lt;-<span class="st"> </span><span class="cf">function</span>(pd_flat) {</a>
@@ -481,7 +503,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ##     pd$lag_newlines[lag(rm_break)] &lt;- 0L
 ##     pd
 ## }
-## &lt;bytecode: 0x7fda9394be58&gt;
+## &lt;bytecode: 0x7fb0639940e0&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>With our example function <code>set_line_break_before_curly_opening()</code> we don’t need to worry about that as we are only adding line breaks, but we don’t remove them.</p>
 </div>

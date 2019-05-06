@@ -3,6 +3,17 @@
 
 # styler
 
+<!-- badges
+[![Build
+Status](https://travis-ci.org/r-lib/styler.svg?branch=master)](https://travis-ci.org/r-lib/styler)
+[![AppVeyor Build
+Status](https://ci.appveyor.com/api/projects/status/github/r-lib/styler?branch=master&svg=true)](https://ci.appveyor.com/project/r-lib/styler)
+[![lifecycle](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
+[![codecov](https://codecov.io/gh/r-lib/styler/branch/master/graph/badge.svg)](https://codecov.io/gh/r-lib/styler)
+[![cran
+version](http://www.r-pkg.org/badges/version/styler)](https://cran.r-project.org/package=styler)
+-->
+
 The goal of styler is to provide non-invasive pretty-printing of R
 source code while adhering to the
 [tidyverse](http://style.tidyverse.org) formatting rules. styler can be
@@ -116,6 +127,9 @@ notably
     RMarkdown script.
   - pretty-printing of [drake](https://github.com/ropensci/drake)
     workflow data frames with `drake::drake_plan_source()`.
+  - Adding styler as a fixer to the [ale
+    Plug-in](https://github.com/w0rp/ale/pull/2401#issuecomment-485942966)
+    for VIM.
 
 ## Further resources
 

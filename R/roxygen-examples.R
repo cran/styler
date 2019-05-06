@@ -1,7 +1,7 @@
 #' Style a roxygen code example that may contain dontrun and friends
 #'
 #' Parses roxygen2 comments into code, breaks it into dont* (dontrun, dontest,
-#' dontshow) and run sections and processes each segment indicidually using
+#' dontshow) and run sections and processes each segment individually using
 #' [style_roxygen_example_snippet()].
 #' @inheritParams parse_transform_serialize_r
 #' @param example Roxygen example code.
@@ -36,7 +36,9 @@ style_roxygen_code_example <- function(example, transformers) {
 #' @importFrom purrr map2 flatten_chr
 #' @keywords internal
 style_roxygen_code_example_segment <- function(one_dont, transformers) {
-  if (length(one_dont) < 1L) return(character())
+  if (length(one_dont) < 1L) {
+    return(character())
+  }
   dont_seqs <- find_dont_seqs(one_dont)
   split_segments <- split_roxygen_segments(one_dont, unlist(dont_seqs))
   is_dont <-
@@ -67,7 +69,7 @@ style_roxygen_example_snippet <- function(code_snippet,
   }
   code_snippet <- post_parse_roxygen(code_snippet) %>%
     paste0(collapse = "\n") %>%
-    parse_transform_serialize_r(transformers)
+    parse_transform_serialize_r(transformers, warn_empty = FALSE)
 
   if (is_dont) {
     code_snippet <- c(mask, code_snippet, "}")

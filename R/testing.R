@@ -17,6 +17,7 @@
 #' function, every *-out.R file has just one in file.
 #' @inheritParams transform_and_check
 #' @importFrom purrr flatten_chr pwalk map
+#' @importFrom rlang abort
 #' @keywords internal
 test_collection <- function(test, sub_test = NULL,
                             write_back = TRUE,
@@ -36,7 +37,7 @@ test_collection <- function(test, sub_test = NULL,
     full.names = FALSE
   )
 
-  if (length(in_names) < 1) stop("no items to check")
+  if (length(in_names) < 1) abort("no items to check")
 
   out_names <- construct_out(in_names)
 
@@ -95,6 +96,7 @@ construct_tree <- function(in_paths, suffix = "_tree") {
 #' @param ... Parameters passed to transformer function.
 #' @param out_tree Name of tree file if written out.
 #' @importFrom utils write.table
+#' @importFrom rlang warn
 #' @keywords internal
 transform_and_check <- function(in_item, out_item,
                                 in_name = in_item, out_name = out_item,
@@ -105,11 +107,17 @@ transform_and_check <- function(in_item, out_item,
   read_in <- xfun::read_utf8(in_item)
   if (write_tree) {
     create_tree(read_in) %>%
-      write.table(out_tree, col.names = FALSE, row.names = FALSE, quote = FALSE)
+      write.table(out_tree, col.names = FALSE, row.names = FALSE, quote = FALSE, fileEncoding = "UTF-8")
   }
   transformed_text <- read_in %>%
     transformer(...) %>%
     unclass()
+  if (!file.exists(out_item)) {
+    warn(paste(
+      "File", out_item, "does not exist. Creating it from transormation."
+    ))
+    file.create(out_item)
+  }
   transformed <- transform_utf8(
     out_item,
     function(x) transformed_text,
@@ -117,10 +125,7 @@ transform_and_check <- function(in_item, out_item,
   )
 
   if (transformed) {
-    warning(
-      in_name, " was different from ", out_name,
-      immediate. = TRUE, call. = FALSE
-    )
+    warn(paste(in_name, "was different from", out_name))
   } else {
     message(in_name, " was identical to ", out_name)
   }

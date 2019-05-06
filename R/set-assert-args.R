@@ -6,11 +6,10 @@
 #' @param write_tree Whether or not to write tree.
 #' @keywords internal
 set_arg_write_tree <- function(write_tree) {
-  sufficient_version <- getRversion() >= 3.2
   if (is.na(write_tree)) {
-    write_tree <- ifelse(sufficient_version, TRUE, FALSE)
-  } else if (!sufficient_version && write_tree) {
-    stop_insufficient_r_version()
+    write_tree <- ifelse(is_installed("data.tree"), TRUE, FALSE)
+  } else if (write_tree) {
+    assert_data.tree_installation()
   }
   write_tree
 }
@@ -36,17 +35,16 @@ set_and_assert_arg_filetype <- function(filetype) {
 #' Make sure all supplied file types are allowed
 #'
 #' @param lowercase_filetype A vector with file types to check, all lower case.
+#' @importFrom rlang abort
 #' @keywords internal
 assert_filetype <- function(lowercase_filetype) {
   if (!all(lowercase_filetype %in% c("r", "rmd", "rnw"))) {
-    stop(
-      "filetype must not contain other values than 'R'",
-      "'Rmd' or 'Rnw' (case is ignored).",
-      call. = FALSE
-    )
+    abort(paste(
+      "filetype must not contain other values than 'R',",
+      "'Rmd' or 'Rnw' (case is ignored)."
+    ))
   }
 }
-
 
 #' Assert text to be of positive length and replace it with the empty
 #' string otherwise.
@@ -59,20 +57,20 @@ assert_text <- function(text) {
   text
 }
 
-
 #' Check token validity
 #'
 #' Check whether one or more tokens exist and have a unique token-text mapping
 #' @param tokens Tokens to check.
+#' @importFrom rlang abort
 #' @keywords internal
 assert_tokens <- function(tokens) {
   invalid_tokens <- tokens[!(tokens %in% lookup_tokens()$token)]
   if (length(invalid_tokens) > 0) {
-    stop(
-      "Token(s) ", paste0(invalid_tokens, collapse = ", "), " are invalid. ",
-      "You can lookup all valid tokens and their text ",
-      "with styler:::lookup_tokens(). Make sure you supply the values of ",
+    abort(paste(
+      "Token(s)", paste0(invalid_tokens, collapse = ", "), "are invalid.",
+      "You can lookup all valid tokens and their text",
+      "with styler:::lookup_tokens(). Make sure you supply the values of",
       "the column 'token', not 'text'."
-    )
+    ))
   }
 }

@@ -1,6 +1,6 @@
 #' Communicate a warning if necessary
 #'
-#' If roundtrip verification was not possible, issue a warning to review the
+#' If round trip verification was not possible, issue a warning to review the
 #' changes carefully.
 #' @param changed Boolean with indicating for each file whether or not it has
 #'   been changed.
@@ -27,9 +27,10 @@ communicate_summary <- function(changed, ruler_width) {
   cli::cat_rule(width = max(40, ruler_width))
 }
 
-stop_insufficient_r_version <- function() {
-  stop(paste0(
-    "Can't write tree with R version ", getRversion(),
-    "since data.tree not available. Needs at least R version 3.2."
-  ), call. = FALSE)
+#' @importFrom rlang abort
+#' @importFrom rlang is_installed
+assert_data.tree_installation <- function() {
+  if (!is_installed("data.tree")) {
+    abort("The package data.tree needs to be installed for this functionality.")
+  }
 }

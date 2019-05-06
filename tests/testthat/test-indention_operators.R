@@ -20,8 +20,27 @@ test_that("mathematical operators are indended correctly", {
 
 test_that("while / for / if without curly brackets", {
   expect_warning(test_collection("indention_operators",
-                                 "while_for_if_without_curly",
+                                 "while_for_if_without_curly_non_strict",
                                  transformer = style_text, strict = FALSE), NA)
+})
+
+test_that("while / for / if without curly brackets", {
+  expect_warning(test_collection("indention_operators",
+                                 "while_for_if_without_curly_strict",
+                                 transformer = style_text, strict = TRUE), NA)
+})
+
+
+test_that("nested for and indention", {
+  expect_warning(test_collection("indention_operators",
+                                 "nested-for-spacing-scope-indention",
+                                 transformer = style_text, scope = "indention"),
+                                 NA)
+
+  expect_warning(test_collection("indention_operators",
+                                 "nested-for-spacing-scope-spaces",
+                                 transformer = style_text, scope = "spaces"),
+                                 NA)
 })
 
 test_that("logical, special EQ_SUB and EQ_ASSIGN tokens are indented correctly", {
