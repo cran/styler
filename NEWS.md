@@ -1,3 +1,60 @@
+# styler 1.2.0
+
+## Breaking changes
+
+* `style_file()` now correctly styles multiple files from different directories.
+  We no longer display the file name of the styled file, but the absolute path.
+  This is also reflected in the invisible return value of the function (#522).
+
+* `style_file()` and friends do not write content back to a file when styling
+  does not cause any changes in the file. This means the modification date of 
+  styled files is only changed when the content is changed (#532).
+
+## New features
+
+* Aligned function calls are detected and kept as is if they match the styler 
+  [definition for aligned function calls](https://styler.r-lib.org/articles/detect-alignment.html)
+  (#537).
+
+* curly-curly (`{{`) syntactic sugar introduced with rlang 0.4.0 is now 
+  explicitly handled, where previously it was just treated as two consecutive 
+  curly braces (#528).
+
+* `style_pkg()`, `style_dir()` and the Addins can now style `.Rprofile`, and
+  hidden files are now also styled (#530).
+
+## Minor improvements and fixes
+
+* Brace expressions in function calls are formatted in a less compact way to 
+  improve readability. Typical use case: `tryCatch()` (#543).
+
+* Arguments in function declarations in a context which is indented multiple 
+  times should now be correct. This typically affects `R6::R6Class()` (#546).
+
+* Escape characters in roxygen code examples are now correctly escaped (#512).
+
+* Special characters such as `\n` in strings are now preserved in text and not 
+  turned into literal values like a line break (#554).
+
+* Style selection Addin now preserves line break when the last line selected is
+  an entire line (#520).
+
+* Style file Addin can now properly handle cancelling (#511).
+
+* The body of a multi-line function declaration is now indented correctly for
+  `strict = FALSE` and also wrapped in curly braces for `strict = TRUE` (#536).
+
+* Advice for contributors in `CONTRIBUTING.md` was updated (#508).
+
+## Adaption
+
+* styler is now available through the pre-commit hook `style-files` in
+  https://github.com/lorenzwalthert/pre-commit-hooks.
+
+Thanks to all contributors involved, in particular
+
+[&#x0040;Banana1530](https://github.com/Banana1530), [&#x0040;batpigandme](https://github.com/batpigandme), [&#x0040;cpsievert](https://github.com/cpsievert), [&#x0040;ellessenne](https://github.com/ellessenne), [&#x0040;Emiller88](https://github.com/Emiller88), [&#x0040;hadley](https://github.com/hadley), [&#x0040;IndrajeetPatil](https://github.com/IndrajeetPatil), [&#x0040;krlmlr](https://github.com/krlmlr), [&#x0040;lorenzwalthert](https://github.com/lorenzwalthert), [&#x0040;lwjohnst86](https://github.com/lwjohnst86), [&#x0040;michaelquinn32](https://github.com/michaelquinn32), [&#x0040;mine-cetinkaya-rundel](https://github.com/mine-cetinkaya-rundel), [&#x0040;Moohan](https://github.com/Moohan), [&#x0040;nxskok](https://github.com/nxskok), [&#x0040;oliverbeagley](https://github.com/oliverbeagley), [&#x0040;pat-s](https://github.com/pat-s), [&#x0040;reddy-ia](https://github.com/reddy-ia), and [&#x0040;russHyde](https://github.com/russHyde)
+
 # styler 1.1.1
 
 This is primarily a maintenance release upon the request of the CRAN team
@@ -7,7 +64,11 @@ This is primarily a maintenance release upon the request of the CRAN team
 
 - Users can now control style configurations for styler Addins (#463, #500),
   using the `Set style` Addin. See `?styler::styler_addins` for details.
-- `%>%` almost always causes a line break now (#503) for `strict = TRUE`.
+
+- `return()` is now always put in braces and put on a new line when used in a
+  conditional statement (#492).
+
+- `%>%` almost always causes a line break now for `strict = TRUE` (#503).
 
 ## Minor changes
 
@@ -18,20 +79,20 @@ This is primarily a maintenance release upon the request of the CRAN team
 - indention in roxygen code example styling (#455) and EOF spacing (#469) was
   fixed.
 
-- indention for for loop edge case (#457) and comments in pipe chain (#482)
-  were fixed.
+- indention for for loop edge case (#457) and comments in pipe chain (#482) were
+  fixed.
 
 - line-break styling around comma is improved (#479).
 
--  bug that can cause an error when the variable `text` in any name space
-  before styler on the search path was defined and did not have length 1 is
-  fixed (#484).
+- bug that can cause an error when the variable `text` in any name space before
+  styler on the search path was defined and did not have length 1 is fixed
+  (#484).
 
 - slightly confusing warning about empty strings caused with roxygen code
   examples and Rmd was removed.
 
-- right apostrophe to let package pass R CMD Check in strict Latin-1
-  locale was removed (#490, reason for release).
+- right apostrophe to let package pass R CMD Check in strict Latin-1 locale was
+  removed (#490, reason for release).
 
 ## Adaption of styler
 

@@ -86,5 +86,5 @@ style_text(code, style = set_line_break_before_curly_opening_style)
 #  }
 
 ## ------------------------------------------------------------------------
-styler:::remove_line_break_before_curly_opening
+styler:::remove_line_break_before_round_closing_after_curly
 

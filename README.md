@@ -3,7 +3,6 @@
 
 # styler
 
-<!-- badges
 [![Build
 Status](https://travis-ci.org/r-lib/styler.svg?branch=master)](https://travis-ci.org/r-lib/styler)
 [![AppVeyor Build
@@ -11,12 +10,11 @@ Status](https://ci.appveyor.com/api/projects/status/github/r-lib/styler?branch=m
 [![lifecycle](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![codecov](https://codecov.io/gh/r-lib/styler/branch/master/graph/badge.svg)](https://codecov.io/gh/r-lib/styler)
 [![cran
-version](http://www.r-pkg.org/badges/version/styler)](https://cran.r-project.org/package=styler)
--->
+version](https://www.r-pkg.org/badges/version/styler)](https://cran.r-project.org/package=styler)
 
 The goal of styler is to provide non-invasive pretty-printing of R
 source code while adhering to the
-[tidyverse](http://style.tidyverse.org) formatting rules. styler can be
+[tidyverse](https://style.tidyverse.org) formatting rules. styler can be
 customized to format code according to other style guides too.
 
 ## Installation
@@ -24,14 +22,14 @@ customized to format code according to other style guides too.
 You can install the package from CRAN:
 
 ``` r
-install.packages("styler") 
+install.packages("styler")
 ```
 
 Or get the development version from GitHub:
 
 ``` r
-# install.packages("remotes") 
-remotes::install_github("r-lib/styler") 
+# install.packages("remotes")
+remotes::install_github("r-lib/styler")
 ```
 
 ## API
@@ -92,21 +90,21 @@ If you wish to keep alignment as is, you can use `strict = FALSE`:
 ``` r
 style_text(
   c(
-    "first  <- 4", 
+    "first  <- 4",
     "second <- 1+1"
   ),
-  strict = FALSE 
-) 
+  strict = FALSE
+)
 #> first  <- 4
 #> second <- 1 + 1
 ```
 
 This was just the tip of the iceberg. Learn more about customization
 with the tidyverse style guide in in this
-[vignette](http://styler.r-lib.org/articles/introducing_styler.html). If
+[vignette](https://styler.r-lib.org/articles/introducing_styler.html). If
 this is not flexible enough for you, you can implement your own style
 guide, as explained in the corresponding
-[vignette](http://styler.r-lib.org/articles/customizing_styler.html).
+[vignette](https://styler.r-lib.org/articles/customizing_styler.html).
 
 ## Adaption of styler
 
@@ -125,6 +123,8 @@ notably
     chunks (e.g. ` ```{r name-of-the-chunk, tidy = "styler"}`), or
     `knitr::opts_chunk$set(tidy = "styler")` at the top of your
     RMarkdown script.
+  - as a pre-commit hook `style-files` in
+    <https://github.com/lorenzwalthert/pre-commit-hooks>.
   - pretty-printing of [drake](https://github.com/ropensci/drake)
     workflow data frames with `drake::drake_plan_source()`.
   - Adding styler as a fixer to the [ale
@@ -133,11 +133,11 @@ notably
 
 ## Further resources
 
-  - The official [web documentation](http://styler.r-lib.org/) of
+  - The official [web documentation](https://styler.r-lib.org/) of
     styler, containing various vignettes function documentation as well
     as a change-log.
   - [Blog
-    post](https://lorenzwalthert.netlify.com/posts/customizing-styler-the-quick-way/)
+    post](https://lorenzwalthert.netlify.com/post/customizing-styler-the-quick-way/)
     about how you can customize styler without being an expert.
   - A [tidyverse.org blog
     post](https://www.tidyverse.org/articles/2017/12/styler-1.0.0/)

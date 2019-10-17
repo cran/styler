@@ -1,9 +1,94 @@
-# A { should never go on its own line
-remove_line_break_before_curly_opening <- function(pd) {
-  rm_break <- (pd$token_after == "'{'") & (pd$token != "COMMENT")
-  pd$lag_newlines[lag(rm_break)] <- 0L
+#' Set line break before a curly brace
+#'
+#' Rule:
+#' * Principle: Function arguments that consist of a braced expression always
+#'   need to start on a new line
+#' * Exception: [...] unless it's the last argument and all other
+#'   arguments fit on the line of the function call
+#' * Exception: [...] or they are named.
+#' * Extension: Also, expressions following on braced expressions also cause a
+#'   line trigger.
+#' @keywords internal
+#' @examples
+#' \dontrun{
+#' tryCatch(
+#'   {
+#'     f(8)
+#'   },
+#'   error = function(e) NULL
+#' )
+#' # last-argument case
+#' testthat("braces braces are cool", {
+#'   code(to = execute)
+#' })
+#' call2(
+#'   x = 2,
+#'   {
+#'     code(to = execute)
+#'   },
+#'   c = { # this is the named case
+#'     g(x = 7)
+#'   }
+#' )
+#' tryGugus(
+#'   {
+#'     g5(k = na)
+#'   },
+#'   a + b # line break also here because
+#'   # preceded by brace expression
+#' )
+#' }
+set_line_break_before_curly_opening <- function(pd) {
+  line_break_to_set_idx <- which(
+    (pd$token_after == "'{'") & (pd$token != "COMMENT")
+  )
+
+  line_break_to_set_idx <- setdiff(line_break_to_set_idx, nrow(pd))
+  if (length(line_break_to_set_idx) > 0) {
+    is_not_curly_curly <- map_chr(
+      line_break_to_set_idx + 1L,
+      ~ next_terminal(pd[.x, ], vars = "token_after")$token_after
+    ) != "'{'"
+    last_expr_idx <- max(which(pd$token == "expr"))
+    is_last_expr <- ifelse(pd$token[1] == "IF",
+      # rule not applicable for IF
+      TRUE, (line_break_to_set_idx + 1L) == last_expr_idx
+    )
+    eq_sub_before <- pd$token[line_break_to_set_idx] == "EQ_SUB"
+    linebreak_before_curly <- ifelse(is_function_call(pd),
+      any(pd$lag_newlines[seq2(1, line_break_to_set_idx[1])] > 0),
+      FALSE
+    )
+    # no line break before last brace expression and named brace expression to
+    should_be_on_same_line <- is_not_curly_curly &
+      ((is_last_expr & !linebreak_before_curly) | eq_sub_before)
+    is_not_curly_curly_idx <- line_break_to_set_idx[should_be_on_same_line]
+    pd$lag_newlines[1 + is_not_curly_curly_idx] <- 0L
+
+
+    # other cases: line breaks
+    should_not_be_on_same_line <- is_not_curly_curly &
+      ((!is_last_expr | linebreak_before_curly) & !eq_sub_before)
+    should_not_be_on_same_line_idx <- line_break_to_set_idx[should_not_be_on_same_line]
+
+    pd$lag_newlines[1 + should_not_be_on_same_line_idx] <- 1L
+
+    # non-curly expressions after curly expressions must have line breaks
+    if (length(should_not_be_on_same_line_idx) > 0) {
+      comma_exprs_idx <- which(pd$token == "','")
+      comma_exprs_idx <- setdiff(comma_exprs_idx, 1 + is_not_curly_curly_idx)
+      non_comment_after_comma <- map_int(comma_exprs_idx,
+        next_non_comment,
+        pd = pd
+      )
+      non_comment_after_expr <-
+        non_comment_after_comma[non_comment_after_comma > should_not_be_on_same_line_idx[1]]
+      pd$lag_newlines[non_comment_after_comma] <- 1L
+    }
+  }
   pd
 }
+
 
 set_line_break_around_comma <- function(pd) {
   comma_with_line_break_that_can_be_removed_before <-
@@ -30,6 +115,53 @@ style_line_break_around_curly <- function(strict, pd) {
   pd
 }
 
+#' Styling around `\{\{`
+#'
+#' With \{rlang\} version 0.4, a new syntactic sugar is introduced, the
+#' curly-curly operator. It interprets this code in a special way:
+#' `call(\{\{ x \}\})`. See this
+#' [blog post](https://www.tidyverse.org/articles/2019/06/rlang-0-4-0/)
+#' on the topic. Here, the curly-curly sugar is understood as two opening
+#' curly braces, followed by an expression followed by two closing curly braces,
+#' e.g. `\{\{1\}\}`. `\{\{1\} + 1\}` does not contain the curly-curly syntactic
+#' sugar according to the above definition. On the other hand `\{\{ x + y \}\}`
+#' is recognized by styler as containing it (and is parsable code)
+#' but will most likely give an error at runtime because the way the syntactic
+#' suggar is defined in rlang is to use a single token within curly-curly. In
+#' addition, because rlang parses `\{\{` in a special way (just as `!!`), the
+#' expression `\{\{ x \}\}` will give a runtime error when used outside of a
+#' context that is capable of handling it, e.g. on the top level (that is, not
+#' within function call like `rlang_fun(\{\{ x \}\})`) or within a base R
+#' function such as [c()]. However, these differences are assumed to be
+#' irrelevant for styling curly-curly, as much as they were for styling `!!`.
+#' curly-curly affects styling of line break and spaces, namely:
+#'
+#' * No line break after first or second `\{`, before third and fourth `\{`.
+#' * No space after first and third `\{`, one space after second and before third
+#'   `\}`.
+#' * No line breaks within curly-curly, e.g. `\{\{ x \}\}` can only contain line
+#'   breaks after the last brace or before the first brace. But these are not
+#'   dependent on curly-curly specifically.
+#' @param pd A parse table.
+#' @keywords internal
+#' @seealso style_text_without_curly_curly
+set_line_break_around_curly_curly <- function(pd) {
+  if (is_curly_expr(pd)) {
+    # none after {
+    opening_before <- (pd$token == "'{'") &
+      (pd$token_before == "'{'" | pd$token_after == "'{'")
+
+    # none before }
+    closing_before <- (pd$token == "'}'") &
+      (pd$token_after == "'}'" | pd$token_before == "'}'")
+    if (any(opening_before) && any(closing_before)) {
+      pd$lag_newlines[lag(opening_before, default = FALSE)] <- 0L
+      pd$lag_newlines[closing_before] <- 0L
+    }
+  }
+  pd
+}
+
 # if ) follows on }, don't break line
 remove_line_break_before_round_closing_after_curly <- function(pd) {
   round_after_curly <- pd$token == "')'" & (pd$token_before == "'}'")
@@ -50,7 +182,7 @@ remove_line_break_before_round_closing_fun_dec <- function(pd) {
 add_line_break_after_pipe <- function(pd) {
   is_pipe <- pd$token == c("SPECIAL-PIPE") & pd$token_after != "COMMENT"
   if (sum(is_pipe) > 1 &&
-      !(next_terminal(pd, vars = "token_before")$token_before %in% c("'('", "EQ_SUB", "','"))) {
+    !(next_terminal(pd, vars = "token_before")$token_before %in% c("'('", "EQ_SUB", "','"))) {
     pd$lag_newlines[lag(is_pipe)] <- 1L
   }
   pd
