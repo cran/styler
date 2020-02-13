@@ -46,9 +46,10 @@ add_cache_block <- function(pd_nested) {
 
 #' Drop all children of a top level expression that are cached
 #'
-#' Note that we do cache top-level comments. Because package code has a lot of
-#' roxygen comments and each of them is a top level expresion, checking is
-#' very expensive.
+#' Note that we do not cache top-level comments. Because package code has a lot
+#' of roxygen comments and each of them is a top level expresion, checking is
+#' very expensive. More expensive than styling, because comments are always
+#' terminals.
 #' @param pd A top-level nest.
 #' @details
 #' Because we process in blocks of expressions for speed, a cached expression
@@ -243,7 +244,8 @@ add_terminal_token_before <- function(pd_flat) {
 #' @describeIn add_token_terminal Initializes `newlines` and `lag_newlines`.
 #' @keywords internal
 add_attributes_caching <- function(pd_flat, transformers) {
-  pd_flat$block <- pd_flat$is_cached <- rep(NA, nrow(pd_flat))
+  pd_flat$block  <- rep(NA, nrow(pd_flat))
+  pd_flat$is_cached <- rep(FALSE, nrow(pd_flat))
   if (cache_is_activated()) {
     is_parent <- pd_flat$parent == 0
     pd_flat$is_cached[is_parent] <- map_lgl(
