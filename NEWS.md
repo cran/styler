@@ -1,3 +1,15 @@
+# styler 1.3.2
+
+Release upon request by the CRAN team.
+
+## Minor changes and fixes
+
+- various fixes to handle special cases for caching and stylerignore and their
+  interaction (#611, #610, #609, #607, #602, #600).
+- also test on macOS (#604).
+- skip timing tests on CRAN as requested by CRAN team because they did not pass 
+  on all machines (#603).
+
 # styler 1.3.1
 
 Emergency release. In case multiple expressions are on one line and only 
