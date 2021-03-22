@@ -8,18 +8,18 @@
 #' @param ... Further arguments passed to [transform_utf8()].
 #' @importFrom rlang abort
 #' @keywords internal
-transform_code <- function(path, fun, ...) {
+transform_code <- function(path, fun, ..., dry) {
   if (is_plain_r_file(path) || is_rprofile_file(path)) {
-    transform_utf8(path, fun = fun, ...)
+    transform_utf8(path, fun = fun, ..., dry = dry)
   } else if (is_rmd_file(path)) {
     transform_utf8(path,
       fun = partial(transform_mixed, transformer_fun = fun, filetype = "Rmd"),
-      ...
+      ..., dry = dry
     )
   } else if (is_rnw_file(path)) {
     transform_utf8(path,
       fun = partial(transform_mixed, transformer_fun = fun, filetype = "Rnw"),
-      ...
+      ..., dry = dry
     )
   } else {
     abort(paste(path, "is not an R, Rmd or Rnw file"))
@@ -64,7 +64,7 @@ separate_chunks <- function(lines, filetype) {
     c(1, r_raw_chunks$ends), c(r_raw_chunks$starts, length(lines)),
     ~ lines[seq2(.x, .y)]
   )
-  lst(r_chunks, text_chunks)
+  list(r_chunks = r_chunks, text_chunks = text_chunks)
 }
 
 #' Identifies raw Rmd or Rnw code chunks

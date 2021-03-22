@@ -30,7 +30,7 @@ code instead of the whole file.
 
 By default, both of the RStudio Addins will apply styling to the (selected)
 file contents without saving changes. Automatic saving can be enabled by
-setting the environment variable \code{save_after_styling} to \code{TRUE}.
+setting the R option \code{styler.save_after_styling} to \code{TRUE}.
 Consider setting this in your \code{.Rprofile} file if you want to persist
 this setting across multiple sessions. Untitled files will always need to be
 saved manually after styling.
@@ -40,7 +40,7 @@ saved manually after styling.
 
 The way of specifying the style in the Addin as well as the auto-save option
 (see below) are experimental. We are currently considering letting the user
-specify the defaults for other style APIs like \code{\link[styler:style_text]{styler::style_text()}},
+specify the defaults for other style APIs like \code{\link[=style_text]{style_text()}},
 either via R options, config files or other ways as well.
 See \href{https://github.com/r-lib/styler/issues/319}{r-lib/styler#319} for
 the current status of this.
@@ -49,7 +49,7 @@ the current status of this.
 \examples{
 \dontrun{
 # save after styling when using the Addin
-Sys.setenv(save_after_styling = TRUE)
+options(styler.save_after_styling = TRUE)
 # only style with scope = "spaces" when using the Addin
 options(
   styler.addins_style_transformer = "styler::tidyverse_style(scope = 'spaces')"

@@ -36,8 +36,7 @@ test_that("comments are treated corectly", {
 
   expect_warning(test_collection("parse_comments",
     "with_indention",
-    transformer = style_text,
-    write_back = TRUE
+    transformer = style_text
   ), NA)
 })
 
@@ -52,6 +51,13 @@ test_that("rplumber tags / syntax is handled properly", {
 test_that("hashbangs are respected", {
   expect_warning(test_collection("parse_comments",
     "shebang",
+    transformer = style_text
+  ), NA)
+})
+
+test_that("xaringan markers are respected", {
+  expect_warning(test_collection("parse_comments",
+    "xaringan",
     transformer = style_text
   ), NA)
 })

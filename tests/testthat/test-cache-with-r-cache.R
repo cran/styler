@@ -54,7 +54,7 @@ test_that("top-level test: Caches top-level expressions efficiently on style_tex
     partially_cached_benchmark["elapsed"] * 2.5,
     not_cached_benchmark["elapsed"]
   )
-  expect_lt(full_cached_benchmark["elapsed"] * 65, benchmark["elapsed"])
+  expect_lt(full_cached_benchmark["elapsed"] * 60, benchmark["elapsed"])
 })
 
 
@@ -64,7 +64,8 @@ capture.output(test_that("cached expressions are displayed propperly", {
   cache_info <- cache_info("testthat", format = "tabular")
   expect_known_value(
     cache_info[, c("n", "size", "last_modified", "activated")],
-    file = test_path("reference-objects/cache-info-1")
+    file = test_path("reference-objects/cache-info-1"),
+    update = getOption("styler.test_dir_writable", TRUE)
   )
 
   activate_testthat_cache()
@@ -73,20 +74,19 @@ capture.output(test_that("cached expressions are displayed propperly", {
   cache_info$size <- round(cache_info$size, -2)
   expect_known_value(
     cache_info[, c("n", "size", "activated")],
-    file = test_path("reference-objects/cache-info-2")
+    file = test_path("reference-objects/cache-info-2"),
+    update = getOption("styler.test_dir_writable", TRUE)
   )
   style_text("a <-function() NULL")
   cache_info <- cache_info(format = "tabular")
   cache_info$size <- round(cache_info$size, -2)
   expect_known_value(
     cache_info[, c("n", "size", "activated")],
-    file = test_path("reference-objects/cache-info-3")
+    file = test_path("reference-objects/cache-info-3"),
+    update = getOption("styler.test_dir_writable", TRUE)
   )
 }))
 
-test_that("cache is deactivated at end of caching related testthat file", {
-  expect_false(cache_is_activated())
-})
 
 
 test_that("When expressions are cached, number of newlines between them are preserved", {
@@ -109,4 +109,8 @@ test_that("When expressions are cached, number of newlines between them are pres
   expect_equal(text[1:4], as.character(style_text(text[1:4])))
 
   expect_equal(text, as.character(style_text(text)))
+})
+
+test_that("cache is deactivated at end of caching related testthat file", {
+  expect_false(cache_is_activated())
 })

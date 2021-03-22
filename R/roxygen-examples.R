@@ -8,12 +8,29 @@
 #' @inheritSection parse_transform_serialize_roxygen Hierarchy
 #' @importFrom purrr map flatten_chr
 #' @keywords internal
-style_roxygen_code_example <- function(example, transformers) {
-  bare <- parse_roxygen(example)
-  one_dont <- split(bare, factor(cumsum(bare %in% dont_keywords())))
-  map(one_dont, style_roxygen_code_example_segment, transformers) %>%
+style_roxygen_code_example <- function(example, transformers, base_indention) {
+  example <- split(example, cumsum(grepl("^#' *@examples", example))) # TODO can this handle @examples 1
+  purrr::map(
+    example, style_roxygen_code_example_one,
+    transformers = transformers, base_indention = base_indention
+  ) %>%
+    flatten_chr()
+}
+
+#' Style a roxygen code example with exactly one `@example` or `@exampleIf`
+#' @inheritParams style_roxygen_code_example
+#' @param example_one A character vector, one element per line, that contains in
+#'   total at most one example tag.
+#' @keywords internal
+style_roxygen_code_example_one <- function(example_one, transformers, base_indention) {
+  bare <- parse_roxygen(example_one)
+  one_dont <- split(bare$text, factor(cumsum(bare$text %in% dont_keywords())))
+  map(one_dont, style_roxygen_code_example_segment,
+    transformers = transformers,
+    base_indention = base_indention
+  ) %>%
     flatten_chr() %>%
-    add_roxygen_mask()
+    add_roxygen_mask(bare$example_type)
 }
 
 #' Style a roxygen code example segment
@@ -35,7 +52,9 @@ style_roxygen_code_example <- function(example, transformers) {
 #' @importFrom rlang seq2
 #' @importFrom purrr map2 flatten_chr
 #' @keywords internal
-style_roxygen_code_example_segment <- function(one_dont, transformers) {
+style_roxygen_code_example_segment <- function(one_dont,
+                                               transformers,
+                                               base_indention) {
   if (length(one_dont) < 1L) {
     return(character())
   }
@@ -46,7 +65,8 @@ style_roxygen_code_example_segment <- function(one_dont, transformers) {
 
   map2(split_segments$separated, is_dont,
     style_roxygen_example_snippet,
-    transformers = transformers
+    transformers = transformers,
+    base_indention = base_indention
   ) %>%
     flatten_chr()
 }
@@ -61,7 +81,8 @@ style_roxygen_code_example_segment <- function(one_dont, transformers) {
 #' @keywords internal
 style_roxygen_example_snippet <- function(code_snippet,
                                           transformers,
-                                          is_dont) {
+                                          is_dont,
+                                          base_indention) {
   if (is_dont) {
     decomposed <- remove_dont_mask(code_snippet)
     code_snippet <- decomposed$code
@@ -70,16 +91,29 @@ style_roxygen_example_snippet <- function(code_snippet,
   code_snippet <- post_parse_roxygen(code_snippet)
 
   cache_is_active <- cache_is_activated()
-  is_cached <- is_cached(code_snippet, transformers)
+  is_cached <- is_cached(
+    code_snippet, transformers,
+    cache_more_specs(
+      include_roxygen_examples = TRUE,
+      base_indention = base_indention
+    )
+  )
   if (!is_cached || !cache_is_active) {
     code_snippet <- code_snippet %>%
-      parse_transform_serialize_r(transformers, warn_empty = FALSE)
+      parse_transform_serialize_r(transformers,
+        base_indention = base_indention, warn_empty = FALSE
+      )
   } else {
     code_snippet <- ensure_last_n_empty(code_snippet, n = 0)
   }
 
   if (!is_cached && cache_is_active) {
-    cache_write(code_snippet, transformers)
+    cache_write(
+      code_snippet, transformers,
+      cache_more_specs(
+        include_roxygen_examples = TRUE, base_indention = base_indention
+      )
+    )
   }
 
   if (is_dont) {

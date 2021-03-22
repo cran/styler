@@ -13,7 +13,9 @@ create_style_guide(
   use_raw_indention = FALSE,
   reindention = tidyverse_reindention(),
   style_guide_name = NULL,
-  style_guide_version = NULL
+  style_guide_version = NULL,
+  more_specs_style_guide = NULL,
+  transformers_drop = specify_transformers_drop()
 )
 }
 \arguments{
@@ -46,13 +48,32 @@ location of the style guide, separated by \code{@}. For example,
 attribute inside the created style guide, for example for caching. This
 should correspond to the version of the R package that exports the
 style guide.}
+
+\item{more_specs_style_guide}{Named vector (coercible to character)
+with all arguments passed to the style guide and used for cache
+invalidation. You can easily capture them in your style guide function
+declaration with \code{as.list(environment())} (compare source code of
+\code{tidyverse_style()}).}
+
+\item{transformers_drop}{A list specifying under which conditions
+transformer functions can be dropped since they have no effect on the
+code to format, most easily constructed with
+\code{\link[=specify_transformers_drop]{specify_transformers_drop()}}. This is argument experimental and may
+change in future releases without prior notification. It was mainly
+introduced to improve speed. Listing transformers here that occur almost
+always in code does not make sense because the process of excluding them
+also takes some time.}
 }
 \description{
 This is a helper function to create a style guide, which is technically
 speaking a named list of groups of transformer functions where each
 transformer function corresponds to one styling rule. The output of this
 function can be used as an argument for \code{style} in top level functions
-like \code{\link[=style_text]{style_text()}} and friends.
+like \code{\link[=style_text]{style_text()}} and friends. Note that for caching to work properly,
+unquote all inputs to the transformer function if possible with rlang's \verb{!!},
+otherwise, they will be passed as references (generic variable names) instead
+of literals and \code{styler:::is_cached()} won't pick up changes. See how it's
+done in \code{\link[=tidyverse_style]{tidyverse_style()}} with \code{indent_by} and other arguments.
 }
 \examples{
 set_line_break_before_curly_opening <- function(pd_flat) {
@@ -62,7 +83,9 @@ set_line_break_before_curly_opening <- function(pd_flat) {
 }
 set_line_break_before_curly_opening_style <- function() {
   create_style_guide(
-    line_break = tibble::lst(set_line_break_before_curly_opening)
+    line_break = tibble::lst(set_line_break_before_curly_opening),
+    style_guide_name = "some-style-guide",
+    style_guide_version = "some-version"
   )
 }
 style_text(

@@ -12,7 +12,9 @@ style_pkg(
   filetype = c("R", "Rprofile"),
   exclude_files = "R/RcppExports.R",
   exclude_dirs = c("packrat", "renv"),
-  include_roxygen_examples = TRUE
+  include_roxygen_examples = TRUE,
+  base_indention = 0,
+  dry = "off"
 )
 }
 \arguments{
@@ -37,12 +39,23 @@ standardization) are: "r", "rprofile", "rmd", "rnw".}
 \item{exclude_files}{Character vector with paths to files that should be
 excluded from styling.}
 
-\item{exclude_dirs}{Character vector with directories to exclude. Note that
-the default values were set for consistency with \code{\link[=style_dir]{style_dir()}} and as
-these directories are anyways not styled.}
+\item{exclude_dirs}{Character vector with directories to exclude
+(recursively). Note that the default values were set for consistency with
+\code{\link[=style_dir]{style_dir()}} and as these directories are anyways not styled.}
 
 \item{include_roxygen_examples}{Whether or not to style code in roxygen
 examples.}
+
+\item{base_indention}{Integer scalar indicating by how many spaces the whole
+output text should be indented. Note that this is not the same as splitting
+by line and add a \code{base_indention} spaces before the code in the case
+multi-line strings are present. See 'Examples'.}
+
+\item{dry}{To indicate whether styler should run in \emph{dry} mode, i.e. refrain
+from writing back to files .\code{"on"} and \code{"fail"} both don't write back, the
+latter returns an error if the input code is not identical to the result
+of styling. "off", the default, writes back if the input and output of
+styling are not identical.}
 }
 \description{
 Performs various substitutions in all \code{.R} files in a package
@@ -53,8 +66,8 @@ Carefully examine the results after running this function!
 \section{Warning}{
 
 This function overwrites files (if styling results in a change of the
-code to be formatted). It is strongly suggested to only style files
-that are under version control or to create a backup copy.
+code to be formatted and \code{dry = "off"}). It is strongly suggested to only
+style files that are under version control or to create a backup copy.
 
 We suggest to first style with \code{scope < "tokens"} and inspect and commit
 changes, because these changes are guaranteed to leave the abstract syntax
@@ -70,14 +83,15 @@ that invalidates code.
 The following section describes when and how styling is guaranteed to
 yield correct code.
 
-If the style guide has \code{scope < "tokens"}, no tokens are changed and the
-abstract syntax tree (AST) should not change.
+If tokens are not in the styling scope (as specified with the \code{scope}
+argument), no tokens are changed and the abstract syntax tree (AST) should
+not change.
 Hence, it is possible to validate the styling by comparing whether the parsed
 expression before and after styling have the same AST.
-This comparison omits comments. styler compares
+This comparison omits roxygen code examples and comments. styler throws an
 error if the AST has changed through styling.
 
-Note that with \code{scope = "tokens"} such a comparison is not conducted because
+Note that if tokens are to be styled, such a comparison is not conducted because
 the AST might well change and such a change is intended. There is no way
 styler can validate styling, that is why we inform the user to carefully
 inspect the changes.
@@ -88,7 +102,8 @@ See section 'Warning' for a good strategy to apply styling safely.
 \section{Value}{
 
 Invisibly returns a data frame that indicates for each file considered for
-styling whether or not it was actually changed.
+styling whether or not it was actually changed (or would be changed when
+\code{dry} is not "off").
 }
 
 \examples{

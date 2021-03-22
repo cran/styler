@@ -12,9 +12,15 @@ test_that("analogous to test-roxygen-examples-complete", {
   ), NA)
 
   expect_warning(test_collection(
-    "roxygen-examples-complete", "^12",
+    "roxygen-examples-complete", "^12-fun",
     transformer = style_text
   ), NA)
+
+  expect_warning(test_collection(
+    "roxygen-examples-complete", "^12-dont",
+    transformer = style_text
+  ), NA)
+
 
   expect_warning(test_collection(
     "roxygen-examples-complete", "^13",
@@ -27,7 +33,7 @@ test_that("analogous to test-roxygen-examples-complete", {
   ), NA)
 
   expect_warning(test_collection(
-    "roxygen-examples-complete", "^2",
+    "roxygen-examples-complete", "^2[^1234567890]",
     transformer = style_text
   ), NA)
 
@@ -89,6 +95,35 @@ test_that("analogous to test-roxygen-examples-complete", {
 
   expect_warning(test_collection(
     "roxygen-examples-complete", "^18",
+    transformer = style_text
+  ), NA)
+  expect_warning(test_collection(
+    "roxygen-examples-complete", "^19",
+    transformer = style_text
+  ), NA)
+
+  expect_warning(test_collection(
+    "roxygen-examples-complete", "^20",
+    transformer = style_text
+  ), NA)
+
+  expect_warning(test_collection(
+    "roxygen-examples-complete", "^21",
+    transformer = style_text
+  ), NA)
+
+  expect_warning(test_collection(
+    "roxygen-examples-complete", "^22",
+    transformer = style_text
+  ), NA)
+
+  expect_warning(test_collection(
+    "roxygen-examples-complete", "^23",
+    transformer = style_text
+  ), NA)
+
+  expect_warning(test_collection(
+    "roxygen-examples-complete", "^24",
     transformer = style_text
   ), NA)
 })

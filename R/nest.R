@@ -2,14 +2,15 @@
 #'
 #' Parses `text` to a flat parse table and subsequently changes its
 #' representation into a nested parse table with [nest_parse_data()].
-#' @param text A character vector to parse.
+#' @inheritParams text_to_flat_pd
 #' @return A nested parse table. See [tokenize()] for details on the columns
 #'   of the parse table.
 #' @importFrom purrr when
 #' @keywords internal
 compute_parse_data_nested <- function(text,
-                                      transformers) {
-  parse_data <- text_to_flat_pd(text, transformers)
+                                      transformers,
+                                      more_specs) {
+  parse_data <- text_to_flat_pd(text, transformers, more_specs = more_specs)
   env_add_stylerignore(parse_data)
   parse_data$child <- rep(list(NULL), length(parse_data$text))
   pd_nested <- parse_data %>%
@@ -37,12 +38,12 @@ compute_parse_data_nested <- function(text,
 #' Note that the parse table might be shallow if caching is enabled and some
 #' values are cached.
 #' @keywords internal
-text_to_flat_pd <- function(text, transformers) {
+text_to_flat_pd <- function(text, transformers, more_specs) {
   tokenize(text) %>%
     add_terminal_token_before() %>%
     add_terminal_token_after() %>%
     add_stylerignore() %>%
-    add_attributes_caching(transformers) %>%
+    add_attributes_caching(transformers, more_specs = more_specs) %>%
     drop_cached_children()
 }
 
@@ -134,7 +135,7 @@ drop_cached_children <- function(pd) {
 #' @details
 #' Note that top-level comments **above** code have negative parents
 #' (the negative value of the parent of the code expression that follows after,
-#' another comment might be in the way though), all comments that are not top
+#' a nother comment might be in the way though), all comments that are not top
 #' level have positive ids. All comments for which no code follows afterwards
 #' have parent 0.
 #' @examples
@@ -153,8 +154,10 @@ find_pos_id_to_keep <- function(pd) {
 
 #' Turn off styling for parts of the code
 #'
-#' Using stylerignore markers, you can temporarily turn off styler. See a
-#' few illustrative examples below.
+#' Using stylerignore markers, you can temporarily turn off styler. Beware that
+#' for `styler > 1.2.0`, some alignment is
+#' [detected by styler](https://styler.r-lib.org/articles/detect-alignment.html),
+#' making stylerignore redundant. See a few illustrative examples below.
 #' @details
 #' Styling is on by default when you run styler.
 #'
@@ -199,7 +202,13 @@ find_pos_id_to_keep <- function(pd) {
 #'   "
 #' )
 #' }
-#'
+#' # some alignment of code is detected, so you don't need to use stylerignore
+#' style_text(
+#'   "call(
+#'     xyz =  3,
+#'     x   = 11
+#'   )"
+#' )
 NULL
 
 
@@ -274,18 +283,18 @@ add_terminal_token_before <- function(pd_flat) {
 #' [default_style_guide_attributes()] (when using [tidyverse_style()]) because
 #' for cached code, we don't build up the nested structure and leave it shallow
 #' (to speed up things), see also [drop_cached_children()].
-#' @param transformers A list with transformer functions, used to check if
-#'   the code is cached.
+#' @inheritParams is_cached
 #' @describeIn add_token_terminal Initializes `newlines` and `lag_newlines`.
 #' @keywords internal
-add_attributes_caching <- function(pd_flat, transformers) {
+add_attributes_caching <- function(pd_flat, transformers, more_specs) {
   pd_flat$block <- rep(NA, nrow(pd_flat))
   pd_flat$is_cached <- rep(FALSE, nrow(pd_flat))
   if (cache_is_activated()) {
     is_parent <- pd_flat$parent == 0
     pd_flat$is_cached[is_parent] <- map_lgl(
       pd_flat$text[pd_flat$parent == 0],
-      is_cached, transformers
+      is_cached, transformers,
+      more_specs = more_specs
     )
     is_comment <- pd_flat$token == "COMMENT"
     pd_flat$is_cached[is_comment] <- rep(FALSE, sum(is_comment))
@@ -312,14 +321,15 @@ remove_terminal_token_before_and_after <- function(pd_flat) {
 #' @return An integer vector of length spaces_after_prefix, which is either
 #'   one (if `force_one = TRUE`) or `space_after_prefix` with all values
 #'   below one set to one.
+#' @return
+#' Numeric vector indicating the number of spaces.
 #' @keywords internal
 set_spaces <- function(spaces_after_prefix, force_one) {
   if (force_one) {
-    n_of_spaces <- rep(1, length(spaces_after_prefix))
+    rep(1, length(spaces_after_prefix))
   } else {
-    n_of_spaces <- pmax(spaces_after_prefix, 1L)
+    pmax(spaces_after_prefix, 1L)
   }
-  n_of_spaces
 }
 
 #' Nest a flat parse table

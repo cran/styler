@@ -6,7 +6,7 @@ test_that("gives warning markers are not correct", {
   )))
 })
 
-test_that("trailing spaces are stripped when checking marker, but not written back", {
+test_that("trailing spaces are stripped when checking marker and written back", {
   expect_equal(
     style_text(c(
       "# styler: off ",
@@ -14,7 +14,7 @@ test_that("trailing spaces are stripped when checking marker, but not written ba
       "# styler: on "
     )) %>%
       as.character(),
-    c("# styler: off ", "1+1", "# styler: on")
+    c("# styler: off", "1+1", "# styler: on")
   )
 })
 
@@ -105,7 +105,7 @@ test_that("Simple example works", {
 
 test_that("stylerignore does not need coincidence with top-level expressions", {
   expect_warning(test_collection("stylerignore", "crossing",
-                                 transformer = style_text
+    transformer = style_text
   ), NA)
 })
 
@@ -117,6 +117,6 @@ test_that("token adding or removing works in stylerignore", {
 
 test_that("no token added or removed in complex case", {
   expect_warning(test_collection("stylerignore", "braces",
-                                 transformer = style_text
+    transformer = style_text
   ), NA)
 })

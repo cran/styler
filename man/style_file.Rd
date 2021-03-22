@@ -9,7 +9,9 @@ style_file(
   ...,
   style = tidyverse_style,
   transformers = style(...),
-  include_roxygen_examples = TRUE
+  include_roxygen_examples = TRUE,
+  base_indention = 0,
+  dry = "off"
 )
 }
 \arguments{
@@ -28,6 +30,17 @@ conveniently constructed via the \code{style} argument and \code{...}. See
 
 \item{include_roxygen_examples}{Whether or not to style code in roxygen
 examples.}
+
+\item{base_indention}{Integer scalar indicating by how many spaces the whole
+output text should be indented. Note that this is not the same as splitting
+by line and add a \code{base_indention} spaces before the code in the case
+multi-line strings are present. See 'Examples'.}
+
+\item{dry}{To indicate whether styler should run in \emph{dry} mode, i.e. refrain
+from writing back to files .\code{"on"} and \code{"fail"} both don't write back, the
+latter returns an error if the input code is not identical to the result
+of styling. "off", the default, writes back if the input and output of
+styling are not identical.}
 }
 \description{
 Performs various substitutions in the files specified.
@@ -42,14 +55,15 @@ before applying styler.
 \section{Value}{
 
 Invisibly returns a data frame that indicates for each file considered for
-styling whether or not it was actually changed.
+styling whether or not it was actually changed (or would be changed when
+\code{dry} is not "off").
 }
 
 \section{Warning}{
 
 This function overwrites files (if styling results in a change of the
-code to be formatted). It is strongly suggested to only style files
-that are under version control or to create a backup copy.
+code to be formatted and \code{dry = "off"}). It is strongly suggested to only
+style files that are under version control or to create a backup copy.
 
 We suggest to first style with \code{scope < "tokens"} and inspect and commit
 changes, because these changes are guaranteed to leave the abstract syntax
@@ -65,14 +79,15 @@ that invalidates code.
 The following section describes when and how styling is guaranteed to
 yield correct code.
 
-If the style guide has \code{scope < "tokens"}, no tokens are changed and the
-abstract syntax tree (AST) should not change.
+If tokens are not in the styling scope (as specified with the \code{scope}
+argument), no tokens are changed and the abstract syntax tree (AST) should
+not change.
 Hence, it is possible to validate the styling by comparing whether the parsed
 expression before and after styling have the same AST.
-This comparison omits comments. styler compares
+This comparison omits roxygen code examples and comments. styler throws an
 error if the AST has changed through styling.
 
-Note that with \code{scope = "tokens"} such a comparison is not conducted because
+Note that if tokens are to be styled, such a comparison is not conducted because
 the AST might well change and such a change is intended. There is no way
 styler can validate styling, that is why we inform the user to carefully
 inspect the changes.

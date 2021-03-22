@@ -19,7 +19,7 @@
 #' @section Auto-Save Option:
 #' By default, both of the RStudio Addins will apply styling to the (selected)
 #' file contents without saving changes. Automatic saving can be enabled by
-#' setting the environment variable `save_after_styling` to `TRUE`.
+#' setting the R option `styler.save_after_styling` to `TRUE`.
 #' Consider setting this in your `.Rprofile` file if you want to persist
 #' this setting across multiple sessions. Untitled files will always need to be
 #' saved manually after styling.
@@ -35,7 +35,7 @@
 #' @examples
 #' \dontrun{
 #' # save after styling when using the Addin
-#' Sys.setenv(save_after_styling = TRUE)
+#' options(styler.save_after_styling = TRUE)
 #' # only style with scope = "spaces" when using the Addin
 #' options(
 #'   styler.addins_style_transformer = "styler::tidyverse_style(scope = 'spaces')"
@@ -50,7 +50,9 @@ style_active_file <- function() {
   communicate_addins_style_transformers()
   context <- get_rstudio_context()
   transformer <- make_transformer(get_addins_style_transformer(),
-    include_roxygen_examples = TRUE, warn_empty = is_plain_r_file(context$path)
+    include_roxygen_examples = TRUE,
+    base_indention = 0,
+    warn_empty = is_plain_r_file(context$path)
   )
   is_r_file <- any(
     is_plain_r_file(context$path),
@@ -72,7 +74,7 @@ style_active_file <- function() {
     paste0(ensure_last_n_empty(out), collapse = "\n"),
     id = context$id
   )
-  if (Sys.getenv("save_after_styling") == TRUE && context$path != "") {
+  if (save_after_styling_is_active() == TRUE && context$path != "") {
     rstudioapi::documentSave(context$id)
   }
   rstudioapi::setCursorPosition(context$selection[[1]]$range)
@@ -85,6 +87,35 @@ style_active_pkg <- function() {
   style_pkg(transformers = get_addins_style_transformer())
 }
 
+#' Heuristic to see if a file styled with the addin should be saved or not.
+#'
+#' Using the R option `"styler.save_after_styling"` and if unset, checks legacy
+#' method via environment variable `save_after_styling`.
+#' @keywords internal
+save_after_styling_is_active <- function() {
+  op_old <- as.logical(toupper(Sys.getenv("save_after_styling")))
+  op_new <- getOption("styler.save_after_styling", default = "")
+  if (!is.na(op_old)) {
+    rlang::warn(paste(
+      "Using the environment variable save_after_styling is depreciated and",
+      "won't work in a future version of styler. Please use the R option",
+      "`styler.save_after_styling` to control the behavior. If both are set,",
+      "the R option is taken."
+    ))
+  }
+
+  if (op_new == "") {
+    if (is.na(op_old)) {
+      op <- FALSE
+    } else {
+      op <- op_old
+    }
+  } else {
+    op <- op_new
+  }
+  op
+}
+
 #' Styles the highlighted selection in a `.R` or `.Rmd` file.
 #' @importFrom rlang abort
 #' @keywords internal
@@ -93,12 +124,16 @@ style_selection <- function() {
   context <- get_rstudio_context()
   text <- context$selection[[1]]$text
   if (all(nchar(text) == 0)) abort("No code selected")
-  out <- style_text(text, transformers = get_addins_style_transformer())
+  out <- style_text(
+    text,
+    transformers = get_addins_style_transformer(),
+    base_indention = nchar(gsub("^( *).*", "\\1", text))
+  )
   rstudioapi::modifyRange(
     context$selection[[1]]$range, paste0(c(out, if (context$selection[[1]]$range$end[2] == 1) ""), collapse = "\n"),
     id = context$id
   )
-  if (Sys.getenv("save_after_styling") == TRUE && context$path != "") {
+  if (save_after_styling_is_active() == TRUE && context$path != "") {
     invisible(rstudioapi::documentSave(context$id))
   }
 }
@@ -153,7 +188,9 @@ get_addins_style_transformer <- function() {
 
 communicate_addins_style_transformers <- function() {
   style_name <- get_addins_style_transformer_name()
-  cat("Using style transformers `", style_name, "`\n", sep = "")
+  if (!getOption("styler.quiet", FALSE)) {
+    cat("Using style transformers `", style_name, "`\n", sep = "")
+  }
 }
 
 #' Style a file as if it was an .R file

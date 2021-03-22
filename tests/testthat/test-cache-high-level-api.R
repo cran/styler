@@ -11,10 +11,9 @@ test_that("activated cache brings speedup on style_file() API", {
 text <- c(
   "#' Roxygen",
   "#' Comment",
-  "#' @examples",
-  "#' 1 + 1",
+  "#' @examples 1 + 1",
   "k <- function() {",
-  "  1 + 1",
+  "  1 + 3",
   "  if (x) {",
   "    k()",
   "  }",
@@ -29,7 +28,7 @@ test_that("activated cache brings speedup on style_text() API on character vecto
     text, text,
     fun = style_text
   )
-  expect_gt(n, 60)
+  expect_gt(n, 55)
 })
 
 test_that("activated cache brings speedup on style_text() API on character scalar", {
@@ -40,7 +39,7 @@ test_that("activated cache brings speedup on style_text() API on character scala
     text2, text2,
     fun = style_text
   )
-  expect_gt(n, 65)
+  expect_gt(n, 55)
 })
 
 
@@ -50,7 +49,7 @@ test_that("trailing line breaks are ignored for caching", {
   n <- n_times_faster_with_cache(text1, text2, clear = "all but last")
   expect_equal(cache_info()$n, 3)
   skip_on_cran()
-  expect_gt(n, 65)
+  expect_gt(n, 55)
 })
 
 test_that("trailing line breaks are ignored for caching in one scalar", {
@@ -59,7 +58,7 @@ test_that("trailing line breaks are ignored for caching in one scalar", {
   n <- n_times_faster_with_cache(text1, text2, clear = "all but last")
   expect_equal(cache_info()$n, 3)
   skip_on_cran()
-  expect_gt(n, 65)
+  expect_gt(n, 55)
 })
 
 test_that("trailing line breaks are ignored for caching in one scalar", {
@@ -71,7 +70,7 @@ test_that("trailing line breaks are ignored for caching in one scalar", {
   n <- n_times_faster_with_cache(text1, text2, clear = "all but last")
   expect_equal(cache_info()$n, 3)
   skip_on_cran()
-  expect_gt(n, 65)
+  expect_gt(n, 55)
 })
 
 test_that("speedup higher when cached roxygen example code is multiple expressions", {
@@ -81,7 +80,7 @@ test_that("speedup higher when cached roxygen example code is multiple expressio
     "#' Roxygen",
     "#' Comment",
     "#' @examples",
-    "#' 1 + 1",
+    "#' call(1 + 1, 33)",
     "#' if (x > 4)",
     "#' bb = 3",
     "#' call(x,y=2)",
@@ -105,8 +104,10 @@ test_that("speedup higher when cached roxygen example code is multiple expressio
   speedup_many_roygen_examples <- n_times_faster_with_cache(
     text_short_styled, text_short_styled_changed
   )
-  # the speed gain for longer expression is 1.2x higher
-  expect_true(speedup_multiple_roygen_example > 1.2 * speedup_many_roygen_examples)
+  # the speed gain for longer expression is 1.1x higher
+  expect_true(
+    speedup_multiple_roygen_example / speedup_many_roygen_examples > 1.1
+  )
 })
 
 
@@ -117,9 +118,9 @@ capture.output(test_that("no speedup when tranformer changes", {
   fresh_testthat_cache()
   t1 <- tidyverse_style()
   first <- system.time(style_text(text, transformers = t1))
-  t1$use_raw_indention <- !t1$use_raw_indention
+  t1 <- tidyverse_style(indent_by = 4)
   second <- system.time(style_text(text, transformers = t1))
-  expect_false(first["elapsed"] / 2 > second["elapsed"])
+  expect_false(first["elapsed"] / 1.2 > second["elapsed"])
 }))
 
 
