@@ -1,7 +1,7 @@
-a3b1fb13b9ec133b9da73430266c7075 *DESCRIPTION
+21a62c153f5292862fe033556ba5feb1 *DESCRIPTION
 dd06d679b3382bbe05ae191c65c4662b *LICENSE
-dc79864544fcfd27ba65b9b46992f9c9 *NAMESPACE
-bbb2c0b2682b41690a79329bd426930d *NEWS.md
+a0ac9596fd8614a96c9fec591771d2c7 *NAMESPACE
+956d8af18a691fa862bac19fdb3cc1e1 *NEWS.md
 11afd214090b8e91941b8ae2d661c944 *R/addins.R
 d00fe26907b91fab42fb4658ebe42bf6 *R/communicate.R
 cfbe0a1141823ea161c3f3df112f4122 *R/compat-dplyr.R
@@ -15,7 +15,7 @@ c3175f9a602e59ff13eda7c97180e51e *R/expr-is.R
 da379adb9b1fdd006500d1aa9fde16b3 *R/io.R
 b460acf5c6b3307d5b9390bcc3dd80fb *R/nest.R
 a5ac68263336c6f6a7b331ebc27c284c *R/nested-to-tree.R
-da148842dbf3929bd581faf260906c0a *R/parse.R
+6216c19aefe0e3cab001601a49d2a6f9 *R/parse.R
 810bbc0d9212940f610b741b5b967fe1 *R/reindent.R
 308462dcdf0f8ff699c6d72db4a3457d *R/relevel.R
 86a734eb53d4ae9e0bf90653b879a2b6 *R/roxygen-examples-add-remove.R
@@ -36,13 +36,13 @@ adeca6334f678e7c7e70629269c5be37 *R/testing-mocks.R
 be66039de73f584c4cb683a0c1ea9ae7 *R/testing.R
 e965cf8d8723f9eb34e2c5ad0c471bb6 *R/token-create.R
 84fe4591295dfc6c937376f7c912116d *R/token-define.R
-4af217ff55f42acdcd1754016d26bd76 *R/transform-block.R
+c92eeb47490d819d8924ca754280cf45 *R/transform-block.R
 274a435bcfbb7b7e1cb15e3de4d4058b *R/transform-code.R
 ce4864d0d958bfe068ceccaa840f1dcc *R/transform-files.R
 8c3adbb9609a43664bbe9f34e8ae3a4b *R/ui-caching.R
-1de5efcca5be359c71bc40ee2f3b74fa *R/ui-styling.R
+303de87306cd0ebad0bfad6ce8551215 *R/ui-styling.R
 f5f38a6729ac358d208b0c617de51723 *R/unindent.R
-18715e3971c142b9865cc60bb21b57b0 *R/utils-cache.R
+7f2ae79b7916f0dce790b062db6756e4 *R/utils-cache.R
 53c0a06041808c3820b707895b6509f6 *R/utils-files.R
 82eefae3d030fceedd216b1ba3c9f2ef *R/utils-navigate-nest.R
 254dfec3035a9be73abdad3e54795283 *R/utils-strings.R
@@ -52,13 +52,12 @@ f5f38a6729ac358d208b0c617de51723 *R/unindent.R
 272ccda56c5162929cb4ddcacfcd5947 *R/zzz.R
 d114021e4a17766a5a6a588525dc3df3 *README.md
 33c9dfbf0ef63621be534427788542b0 *build/vignette.rds
-b6905564e59531afdac4b0afa047ca14 *inst/WORDLIST
 c7d75707d66a42f4de758cce8ddf9786 *inst/doc/caching.R
 215d1c5068877ea1228d12c5117c833b *inst/doc/caching.Rmd
 0c94860a870da1e8dc10c17258b68a07 *inst/doc/caching.html
 f5027231486007623f0cf2f899daa88c *inst/doc/customizing_styler.R
 fd2f834b5c9347538dccd31ffbae0247 *inst/doc/customizing_styler.Rmd
-4a78b8e91eca9508269b724f81582e05 *inst/doc/customizing_styler.html
+45a8af20333575f51874cbab4133de39 *inst/doc/customizing_styler.html
 17707442802302667eb2fb765abcc3af *inst/doc/detect-alignment.R
 38dab01b1ab306796aab2b0c81ed5789 *inst/doc/detect-alignment.Rmd
 0a8cab9b12fe16189dc92cce965a9be5 *inst/doc/detect-alignment.html
@@ -76,6 +75,7 @@ eed73e42056262e15fd8ada18bcd6c3d *inst/doc/strict.html
 3c9e2d06e8560272e30c98b0c827478b *inst/doc/third-party-integrations.R
 f8ba673ba0b9002f6fe8745aea034c9d *inst/doc/third-party-integrations.Rmd
 2006c2273f763892e21df576bcf79a32 *inst/doc/third-party-integrations.html
+51f43bc1e5a74b6c8042a215a2780fbb *inst/hooks/require-news-update.R
 165fca190c1218947632bb3d80d152c5 *inst/rstudio/addins.dcf
 38fb628e87e3ecdc1eb031d7debcf186 *man/add_cache_block.Rd
 731e0b4b1c192a674be157324f606712 *man/add_id_and_short.Rd
@@ -142,7 +142,7 @@ f04cb46870bc4bfbb61da8ae06c871b1 *man/default_style_guide_attributes.Rd
 c262f74ed51f7bdf9ef21d6aece71475 *man/emulate_rd.Rd
 df06afa4dff657daec26234280f03184 *man/enhance_mapping_special.Rd
 0cfa2d7e8feb92a5b41d868c3a1475bc *man/enrich_terminals.Rd
-7434d744d4ea90749b3e894ff186aa89 *man/ensure_correct_str_txt.Rd
+cd0642c89f9ff8fee09f398dcae2d777 *man/ensure_correct_txt.Rd
 fbdc07a0ebef74833ac3c362253c6543 *man/ensure_last_n_empty.Rd
 31d156d43e4ceb9c2dad90a3dd46a210 *man/ensure_valid_pd.Rd
 d3d9e6b2b3448f684341937f63573cb8 *man/env_add_stylerignore.Rd
@@ -169,7 +169,6 @@ d41e1bbfb619fc1314fc45eb28d5b291 *man/get_knitr_pattern.Rd
 20872a6af842305888669b9903281280 *man/get_parse_data.Rd
 d015e21dd5d7f286ef56d355fde087e8 *man/has_crlf_as_first_line_sep.Rd
 19d85ecca47df5c912d7c60607668986 *man/hash_standardize.Rd
-e9d07105e9a4862bc358ce88663c98a0 *man/identify_insufficiently_parsed_strings.Rd
 215aed44a071e413318cbc3b4990c4e6 *man/identify_raw_chunks.Rd
 8a83d1377cfb892457f64e5ec4061652 *man/identify_start_to_stop_of_roxygen_examples_from_text.Rd
 75182bf77215f1f4aa9e118bcc415ef2 *man/if_for_while_part_requires_braces.Rd
@@ -177,6 +176,7 @@ f26a974826e795b89a5b6bf717a02a85 *man/initialize_attributes.Rd
 a57affc850d549fbdee6b6cc1aa0995e *man/invalid_utf8.Rd
 4caafb920a72b8291bca49d73454be83 *man/is_cached.Rd
 22ed77f072579804c015ac327724a6f5 *man/is_code_chunk_header_or_xaringan.Rd
+1e670e95575c9d104f2a3bcdea6c1af1 *man/is_insufficiently_parsed_string.Rd
 b2049d5051a80d67f376a37434914432 *man/is_shebang.Rd
 44dbf009ddceb997d3c4beecd183ee74 *man/is_tilde_expr.Rd
 ebf94d9d90851763bbebfe5c9b07852b *man/lookup_new_special.Rd
@@ -239,10 +239,10 @@ c4df2f5e517509caadfd86ef95fc8076 *man/specify_transformers_drop.Rd
 ad89aaa97cc8cc6352386da88733fe7f *man/split_roxygen_segments.Rd
 bc545aa9a76161b71505f1ff580a5201 *man/start_comments_with_space.Rd
 07685aa0c7f10200c85b045a5313f49a *man/style_active_pkg.Rd
-a1afb71ae66e1520e151fb346c07ade8 *man/style_dir.Rd
-4399524cb888f6cb90c857f0693a0033 *man/style_file.Rd
+26cfdc516702c0be361a737049e92505 *man/style_dir.Rd
+b1282f1895399cdab95db375fdfc3d17 *man/style_file.Rd
 899f967a75c4df3c4db6dfc422a6bf3d *man/style_guides.Rd
-35721aae1c65e7b0f2a57d80a58092f9 *man/style_pkg.Rd
+fb46ffad3f0e43975e0a849f85297a3a *man/style_pkg.Rd
 064d442c66e7ea57cf027548c70ac589 *man/style_roxygen_code_example.Rd
 a3d36a1f00489eb706b967133384dfba *man/style_roxygen_code_example_one.Rd
 e9dad9fe699eec946ad00c3bf560adbd *man/style_roxygen_code_example_segment.Rd
@@ -250,7 +250,7 @@ ab13ac24f1e35b24feb7be65e98f9ca2 *man/style_roxygen_example_snippet.Rd
 895209686e4d9fa3d6ac29c400a87976 *man/style_selection.Rd
 bda9a2f82ec746d378d49ca0da2948d6 *man/style_space_around_math_token.Rd
 6a9975b064cae25233da0529f73e87c8 *man/style_space_around_token.Rd
-7bffe98be94b8dfab0c419b771384276 *man/style_text.Rd
+d1c93d9b7c7a0b623fc350db827af099 *man/style_text.Rd
 e3d9ed3a1af3e2b2a15dbef3662a5fe2 *man/style_text_without_curly_curly.Rd
 8cef949a8f7056741a2d3bf6470fa48f *man/styler-package.Rd
 ad5992899e902e4f48fb6c002d055ff8 *man/styler_addins.Rd
@@ -902,8 +902,8 @@ eb67e2fb71c53cf112a7692a97debf60 *tests/testthat/stylerignore/crossing-with-expr
 2830166e1e121ed9c005b5c9589f5e04 *tests/testthat/stylerignore/simple-in.R
 602ec5cf124414fe6b33931b73681480 *tests/testthat/stylerignore/simple-in_tree
 7f9d8944b19132853c0cb1f8874fd566 *tests/testthat/stylerignore/simple-out.R
-b670dd925c4ca827970de30af4b0b1c8 *tests/testthat/test-cache-high-level-api.R
-aae80660276ff7c1dde14804362fcdb2 *tests/testthat/test-cache-interaction-base-indention.R
+49f876272d6b1d262337159d2488c71d *tests/testthat/test-cache-high-level-api.R
+b59d05c011cb707e9e8eed4bcdb4434e *tests/testthat/test-cache-interaction-base-indention.R
 ccc3eda88b9f68c6af358a8374b6fa88 *tests/testthat/test-cache-interaction-more-specs.R
 e98756283cd3d88e415a88594ab6d291 *tests/testthat/test-cache-interaction-roxygen-code-examples.R
 87b2b8fe996448173e044ea4a1d51511 *tests/testthat/test-cache-low-level-api.R
@@ -931,7 +931,7 @@ e2f80c16deefa4f21a8d9c442f99bcf8 *tests/testthat/test-interaction-caching-commen
 c7e1e6f5b04509ce25d50e39cdae9759 *tests/testthat/test-math_token_spacing.R
 a31d06d3bba41b562f09832bad675de8 *tests/testthat/test-multiple_expressions.R
 0c5ee9b1b4382ba14d7da9a96110963d *tests/testthat/test-parse_comments.R
-9865db7aeed3d470a8888ad19e2c56ba *tests/testthat/test-parsing.R
+f1f29c37d99c95535679534f8ea03aa7 *tests/testthat/test-parsing.R
 e4ab4509050d1ccb24d17fd077ec33fe *tests/testthat/test-public_api.R
 d6c96e0a4dec956b46432ea6ac7f2b7c *tests/testthat/test-relocate_eq_assign.R
 53485910932b57fb4ac02f0fefdff648 *tests/testthat/test-rmd.R
