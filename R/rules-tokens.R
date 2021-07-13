@@ -17,7 +17,7 @@ resolve_semicolon <- function(pd) {
 }
 
 add_brackets_in_pipe <- function(pd) {
-  is_pipe <- pd$token == "SPECIAL-PIPE"
+  is_pipe <- pd$token %in% c("SPECIAL-PIPE", "PIPE")
   Reduce(add_brackets_in_pipe_one, which(is_pipe), init = pd)
 }
 
@@ -31,7 +31,7 @@ add_brackets_in_pipe_one <- function(pd, pos) {
       tokens = c("'('", "')'"),
       texts = c("(", ")"),
       pos_ids = new_pos_ids,
-      lag_newlines = rep(0, 2)
+      lag_newlines = rep(0L, 2)
     )
     pd$child[[next_non_comment]] <- bind_rows(
       pd$child[[next_non_comment]],
@@ -113,7 +113,8 @@ wrap_else_multiline_curly <- function(pd, indent_by = 2, space_after = 0) {
   if (contains_else_expr(pd) &&
     pd_is_multi_line(pd) &&
     contains_else_expr_that_needs_braces(pd) &&
-    !any(pd$stylerignore)) {
+    !any(pd$stylerignore) &&
+    pd$token_before[1] != "SPECIAL-PIPE") {
     else_idx <- which(pd$token == "ELSE")
     pd$spaces[else_idx] <- 1L
     all_to_be_wrapped_ind <- seq2(else_idx + 1L, nrow(pd))

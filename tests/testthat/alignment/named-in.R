@@ -176,3 +176,48 @@ call(
   y  = f(
   ),
 )
+
+
+# aligned (left after `=`)
+ca(
+  x  = 23200,
+  y2 = "hi",
+  m  = c(rm.na = 7)
+)
+
+# not aligned (left after `=`)
+ca(
+  x  = 23200,
+  y2 = "hi",
+  m  =  c(rm.na = 7)
+)
+
+# aligned =, first all named
+fell(
+  x  = 8, annoying   = 3,
+  y  = 23, # nothing in column 2 for row 2
+  zz = NULL, finally = "stuff"
+)
+
+# aligned =, first not all named
+gell(
+  p = 2,   g = gg(x), n = 3 * 3, #
+  31,    fds = -1, gz   = f / 3 + 1,
+)
+
+xgle(
+  1212, 232, f(n = 2),
+  1,      2,  "kFlya"
+)
+
+# left aligned after ,
+call(
+  x = 2,           y = "another",
+  y = "hhjkjkbew", x = 3
+)
+
+call(
+  k = ff("pk"), k = 3,
+  b = f(-g),    22 + 1,
+  44,           323
+)

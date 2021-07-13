@@ -10,13 +10,26 @@ test_that("styler can style package", {
 })
 
 test_that("styler can style package and exclude some directories", {
-  capture_output(expect_true({
+  capture_output(
     styled <- style_pkg(testthat_file("public-api", "xyzpackage"),
       exclude_dirs = "tests"
     )
-    nrow(styled) == 1
-  }))
+  )
+  expect_true(nrow(styled) == 1)
+  expect_false(any(grepl("tests/testthat/test-package-xyz.R", styled$file)))
 })
+
+test_that("styler can style package and exclude some sub-directories", {
+  capture_output(
+    styled <- style_pkg(testthat_file("public-api", "xyzpackage"),
+      exclude_dirs = "tests/testthat"
+    )
+  )
+  expect_true(nrow(styled) == 2)
+  expect_true(any(grepl("tests/testthat.R", styled$file)))
+  expect_false(any(grepl("tests/testthat/test-package-xyz.R", styled$file)))
+})
+
 
 
 test_that("styler can style package and exclude some directories and files", {
@@ -137,11 +150,13 @@ test_that("styler can style Rmd file", {
 
 test_that("styler handles malformed Rmd file and invalid R code in chunk", {
   capture_output(expect_warning(
-    style_file(testthat_file("public-api", "xyzfile_rmd", "random3.Rmd"), strict = FALSE)
+    style_file(testthat_file("public-api", "xyzfile_rmd", "random4.Rmd"), strict = FALSE),
+    "3: "
   ))
 
   capture_output(expect_warning(
-    style_file(testthat_file("public-api", "xyzfile_rmd", "random4.Rmd"), strict = FALSE)
+    style_file(testthat_file("public-api", "xyzfile_rmd", "random7.Rmd"), strict = FALSE),
+    "Malformed file"
   ))
 })
 

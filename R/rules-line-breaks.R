@@ -113,6 +113,12 @@ style_line_break_around_curly <- function(strict, pd) {
       1L,
       pmax(1L, pd$lag_newlines[to_break])
     )
+  } else {
+    is_else <- pd$token == "ELSE"
+    if (any(pd$token_before[is_else] == "'}'")) {
+      pd$lag_newlines[is_else] <- 0L
+      pd$spaces[c(is_else, FALSE)[-1]] <- 1L
+    }
   }
   pd
 }
@@ -182,7 +188,7 @@ remove_line_breaks_in_fun_dec <- function(pd) {
 
 #' @importFrom rlang seq2
 add_line_break_after_pipe <- function(pd) {
-  is_pipe <- pd$token == c("SPECIAL-PIPE")
+  is_pipe <- pd$token %in% c("SPECIAL-PIPE", "PIPE")
   pd$lag_newlines[lag(is_pipe) & pd$lag_newlines > 1] <- 1L
 
   if (sum(is_pipe & pd$token_after != "COMMENT") > 1 &&
@@ -195,7 +201,7 @@ add_line_break_after_pipe <- function(pd) {
 set_line_break_after_assignment <- function(pd) {
   is_assignment <- lag(pd$token, default = FALSE) %in% c("LEFT_ASSIGN", "EQ_ASSIGN")
   if (any(is_assignment)) {
-    pd$lag_newlines[is_assignment] <- min(1, pd$lag_newlines[is_assignment])
+    pd$lag_newlines[is_assignment] <- pmin(1L, pd$lag_newlines[is_assignment])
   }
   pd
 }
@@ -289,7 +295,7 @@ set_line_break_before_closing_call <- function(pd, except_token_before) {
   }
   npd <- nrow(pd)
   is_multi_line <- any(pd$lag_newlines[seq2(3L, npd - 1L)] > 0)
-  if (!is_multi_line) {
+  if (is_multi_line == 0) {
     exception <- which(pd$token_before %in% except_token_before)
     pd$lag_newlines[setdiff(npd, exception)] <- 0L
     return(pd)

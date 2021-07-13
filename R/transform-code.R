@@ -72,6 +72,10 @@ separate_chunks <- function(lines, filetype) {
 #' Raw in the sense that these chunks don't contain pure R code, but they
 #' contain a header and footer of markdown. Only code chunks that have an engine
 #' whose name matches `engine-pattern` are considered as R code.
+#' For every opening, we match the next closing. If there are not the same
+#' amount of closing and openings after this matching, we throw an error.
+#' Similarly, if there are two openings before a closing, the closing gets
+#' matched twice, on which we throw an error.
 #' @inheritParams separate_chunks
 #' @param engine_pattern A regular expression that must match the engine name.
 #' @importFrom rlang abort
@@ -83,25 +87,45 @@ identify_raw_chunks <- function(lines, filetype, engine_pattern = get_engine_pat
   }
 
   if (filetype == "Rmd") {
-    chunks <- grep("^[\t >]*```+\\s*", lines, perl = TRUE)
-    starts <- odd(chunks)
-    ends <- even(chunks)
-    is_r_code <- grepl(
-      paste0("^[\t >]*```+\\s*\\{\\s*", engine_pattern, "[\\s\\},]"),
-      lines[starts],
-      perl = TRUE
-    )
+    starts <- grep("^[\t >]*```+\\s*\\{([Rr]( *[ ,].*)?)\\}\\s*$", lines, perl = TRUE)
+    ends <- grep("^[\t >]*```+\\s*$", lines, perl = TRUE)
+    ends <- purrr::imap_int(starts, ~ ends[which(ends > .x)[1]]) %>%
+      stats::na.omit()
+    if (length(starts) != length(ends) || anyDuplicated(ends) != 0) {
+      abort("Malformed file!")
+    }
   } else if (filetype == "Rnw") {
     starts <- grep(pattern$chunk.begin, lines, perl = TRUE)
     ends <- grep(pattern$chunk.end, lines, perl = TRUE)
-    is_r_code <- rep(TRUE, length(starts))
+    if (length(starts) != length(ends)) {
+      abort("Malformed file!")
+    }
   }
 
-  if (length(starts) != length(ends)) {
-    abort("Malformed file!")
-  }
+  purrr::map2(starts, ends, finalize_raw_chunks,
+    filetype = filetype, lines = lines
+  ) %>%
+    purrr::compact() %>%
+    purrr::transpose()
+}
 
-  list(starts = starts[is_r_code], ends = ends[is_r_code])
+#' Drop start / stop, when formatting is turned off
+#'
+#' If `tidy = FALSE` (the knitr code chunk default), code is not styled upon
+#' knitting. If it is explicitly added to a code chunk, the code chunk is in
+#' addition not styled with styler when formatting the document.
+#' @keywords internal
+finalize_raw_chunks <- function(start, end, filetype, lines) {
+  header <- gsub(get_knitr_pattern(filetype)$chunk.begin, "\\2", lines[start])
+  parsed <- get_parse_data(paste0("c(", header, ")"))$text
+  do_not_tidy <- any(parsed == "tidy") &&
+    parsed[which(parsed == "tidy") + 1] == "=" &&
+    parsed[which(parsed == "tidy") + 2] == "FALSE"
+  if (do_not_tidy) {
+    return(NULL)
+  } else {
+    list(starts = start, ends = end)
+  }
 }
 
 #' What's the engine pattern for rmd code chunks?
