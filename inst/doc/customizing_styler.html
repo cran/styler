@@ -186,7 +186,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##     pd_flat$spaces[paren_after &amp; (pd_flat$newlines == 0L)] &lt;- 0L
 ##     pd_flat
 ## }
-## &lt;bytecode: 0x7fdcd83547a0&gt;
+## &lt;bytecode: 0x7fce456d7048&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>As the name says, this function removes spaces after the opening parenthesis. But how? Its input is a <em>nest</em>. Since the visitor will go through all levels of nesting, we just need a function that can be applied to a <em>nest</em>, that is, to a parse table at one level of nesting. We can compute the nested parse table and look at one of the levels of nesting that is interesting for us (more on the data structure in the vignettes “Data structures” and “Manipulating the parse table”):</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>string_to_format <span class="ot">&lt;-</span> <span class="st">&quot;call( 3)&quot;</span></span>
@@ -194,7 +194,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  styler<span class="sc">:::</span><span class="fu">pre_visit</span>(<span class="fu">c</span>(default_style_guide_attributes))</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>pd<span class="sc">$</span>child[[<span class="dv">1</span>]] <span class="sc">%&gt;%</span></span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(token, terminal, text, newlines, spaces)</span></code></pre></div>
-<pre><code>## # A tibble: 4 x 5
+<pre><code>## # A tibble: 4 × 5
 ##   token terminal text  newlines spaces
 ##   &lt;chr&gt; &lt;lgl&gt;    &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;
 ## 1 expr  FALSE    call         0      0
@@ -205,7 +205,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>All the function <code>remove_space_after_opening_paren()</code> now does is to look for the opening bracket and set the column <code>spaces</code> of the token to zero. Note that it is very important to check whether there is also a line break following after that token. If so, <code>spaces</code> should not be touched because of the way <code>spaces</code> and <code>newlines</code> are defined. <code>spaces</code> are the number of spaces after a token and <code>newlines</code>. Hence, if a line break follows, spaces are not EOL spaces, but rather the spaces directly before the next token. If there was a line break after the token and the rule did not check for that, indention for the token following <code>(</code> would be removed. This would be unwanted for example if <code>use_raw_indention</code> is set to <code>TRUE</code> (which means indention should not be touched). If we apply the rule to our parse table, we can see that the column <code>spaces</code> changes and is now zero for all tokens:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>styler<span class="sc">:::</span><span class="fu">remove_space_after_opening_paren</span>(pd<span class="sc">$</span>child[[<span class="dv">1</span>]]) <span class="sc">%&gt;%</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(token, terminal, text, newlines, spaces)</span></code></pre></div>
-<pre><code>## # A tibble: 4 x 5
+<pre><code>## # A tibble: 4 × 5
 ##   token terminal text  newlines spaces
 ##   &lt;chr&gt; &lt;lgl&gt;    &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;
 ## 1 expr  FALSE    call         0      0
@@ -261,7 +261,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##         outer_indention_refs = NA)
 ##     transformed_absolute_indent
 ## }
-## &lt;bytecode: 0x7fdcd8bfd3c0&gt;
+## &lt;bytecode: 0x7fce43c46e00&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>This means that the order of the styling is clearly defined and it is for example not possible to modify line breaks based on spacing, because spacing will be set after line breaks are set. Do not rely on the column <code>col1</code>, <code>col2</code>, <code>line1</code> and <code>line2</code> in the parse table in any of your functions since these columns only reflect the position of tokens at the point of parsing,</p>
 <p>i.e. they are not kept up to date throughout the process of styling.</p>
@@ -306,7 +306,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> styler<span class="sc">:::</span><span class="fu">compute_parse_data_nested</span>(code)</span></code></pre></div>
 <p>The token of interest here has id number 10. Let’s navigate there. Since line break rules manipulate the lags <em>before</em> the token, we need to change <code>lag_newlines</code> at the token “‘{’”.</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pd<span class="sc">$</span>child[[<span class="dv">1</span>]]<span class="sc">$</span>child[[<span class="dv">3</span>]]<span class="sc">$</span>child[[<span class="dv">5</span>]]</span></code></pre></div>
-<pre><code>## # A tibble: 3 x 18
+<pre><code>## # A tibble: 3 × 18
 ##      id pos_id line1  col1 line2  col2 parent token terminal text  short
 ##   &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;int&gt; &lt;chr&gt; &lt;lgl&gt;    &lt;chr&gt; &lt;chr&gt;
 ## 1     9     11     1    24     1    24     19 &#39;{&#39;   TRUE     {     {    
@@ -351,7 +351,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##     pd$lag_newlines[round_after_curly] &lt;- 0L
 ##     pd
 ## }
-## &lt;bytecode: 0x7fdcd83b2fa0&gt;
+## &lt;bytecode: 0x7fce44cdf740&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>With our example function <code>set_line_break_before_curly_opening()</code> we don’t need to worry about that as we are only adding line breaks, but we don’t remove them.</p>
 </div>

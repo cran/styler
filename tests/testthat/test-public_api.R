@@ -148,6 +148,21 @@ test_that("styler can style Rmd file", {
   expect_false(styled$changed)
 })
 
+test_that("styler can style Rmarkdown file", {
+  capture_output(expect_false({
+    out <- style_file(
+      testthat_file("public-api", "xyzfile_rmd", "random.Rmarkdown"),
+      strict = FALSE
+    )
+    out$changed
+  }))
+
+  capture_output(expect_warning(
+    styled <- style_file(testthat_file("public-api", "xyzfile_rmd", "random2.Rmarkdown"), strict = FALSE)
+  ))
+  expect_false(styled$changed)
+})
+
 test_that("styler handles malformed Rmd file and invalid R code in chunk", {
   capture_output(expect_warning(
     style_file(testthat_file("public-api", "xyzfile_rmd", "random4.Rmd"), strict = FALSE),
@@ -161,6 +176,7 @@ test_that("styler handles malformed Rmd file and invalid R code in chunk", {
 })
 
 context("messages are correct")
+
 
 test_that("messages (via cat()) of style_file are correct", {
   for (encoding in ls_testable_encodings()) {
@@ -226,14 +242,15 @@ test_that("Messages can be suppressed", {
 
 context("public API - Rmd in style_dir()")
 
-test_that("styler can style R and Rmd files via style_dir()", {
+test_that("styler can style R, Rmd and Rmarkdown files via style_dir()", {
   msg <- capture_output(
     style_dir(testthat_file("public-api", "xyz-r-and-rmd-dir"),
-      filetype = c("R", "Rmd")
+      filetype = c("R", "Rmd", "Rmarkdown")
     )
   )
   expect_true(any(grepl("random-script-in-sub-dir.R", msg, fixed = TRUE)))
   expect_true(any(grepl("random-rmd-script.Rmd", msg, fixed = TRUE)))
+  expect_true(any(grepl("random-rmd-script.Rmarkdown", msg, fixed = TRUE)))
 })
 
 test_that("styler can style Rmd files only via style_dir()", {
@@ -244,9 +261,10 @@ test_that("styler can style Rmd files only via style_dir()", {
   )
   expect_true(any(grepl("random-rmd-script.Rmd", msg, fixed = TRUE)))
   expect_false(any(grepl("random-script-in-sub-dir.R", msg, fixed = TRUE)))
+  expect_false(any(grepl("random-rmd-script.Rmarkdown", msg, fixed = TRUE)))
 })
 
-test_that("styler can style .r and .rmd files via style_dir()", {
+test_that("styler can style .r and .rmd files only via style_dir()", {
   msg <- capture_output(
     style_dir(testthat_file("public-api", "xyz-r-and-rmd-dir"),
       filetype = c(".r", ".rmd")
@@ -254,6 +272,7 @@ test_that("styler can style .r and .rmd files via style_dir()", {
   )
   expect_true(any(grepl("random-script-in-sub-dir.R", msg, fixed = TRUE)))
   expect_true(any(grepl("random-rmd-script.Rmd", msg, fixed = TRUE)))
+  expect_false(any(grepl("random-rmd-script.Rmarkdown", msg, fixed = TRUE)))
 })
 
 context("public API - Rmd in style_pkg()")
@@ -261,12 +280,13 @@ context("public API - Rmd in style_pkg()")
 test_that("styler can style R and Rmd files via style_pkg()", {
   msg <- capture_output(
     style_pkg(testthat_file("public-api", "xyzpackage-rmd"),
-      filetype = c("R", "Rmd")
+      filetype = c("R", "Rmd", "Rmarkdown")
     )
   )
   expect_true(any(grepl("hello-world.R", msg, fixed = TRUE)))
   expect_true(any(grepl("test-package-xyz.R", msg, fixed = TRUE)))
   expect_true(any(grepl("random.Rmd", msg, fixed = TRUE)))
+  expect_true(any(grepl("random.Rmarkdown", msg, fixed = TRUE)))
   expect_true(any(grepl("README.Rmd", msg, fixed = TRUE)))
   expect_false(any(grepl("RcppExports.R", msg, fixed = TRUE)))
 })
@@ -280,7 +300,22 @@ test_that("styler can style Rmd files only via style_pkg()", {
   expect_false(any(grepl("hello-world.R", msg, fixed = TRUE)))
   expect_false(any(grepl("test-package-xyz.R", msg, fixed = TRUE)))
   expect_true(any(grepl("random.Rmd", msg, fixed = TRUE)))
+  expect_false(any(grepl("random.Rmarkdown", msg, fixed = TRUE)))
   expect_true(any(grepl("README.Rmd", msg, fixed = TRUE)))
+  expect_false(any(grepl("RcppExports.R", msg, fixed = TRUE)))
+})
+
+test_that("styler can style Rmarkdown files only via style_pkg()", {
+  msg <- capture_output(
+    style_pkg(testthat_file("public-api", "xyzpackage-rmd"),
+      filetype = "Rmarkdown"
+    )
+  )
+  expect_false(any(grepl("hello-world.R", msg, fixed = TRUE)))
+  expect_false(any(grepl("test-package-xyz.R", msg, fixed = TRUE)))
+  expect_false(any(grepl("random.Rmd", msg, fixed = TRUE)))
+  expect_true(any(grepl("random.Rmarkdown", msg, fixed = TRUE)))
+  expect_false(any(grepl("README.Rmd", msg, fixed = TRUE)))
   expect_false(any(grepl("RcppExports.R", msg, fixed = TRUE)))
 })
 
@@ -289,6 +324,7 @@ test_that("insufficient R version returns error", {
 })
 
 context("public API - Rnw in style_file()")
+
 
 test_that("styler can style Rnw file", {
   capture_output(expect_false({
@@ -344,6 +380,7 @@ test_that("styler can style Rnw files only via style_pkg()", {
 })
 
 test_that("dry run options work:", {
+  local_test_setup()
   path <- test_path("public-api/dry/unstyled.R")
   # test the testing function
   expect_error(test_dry(path, style_file, styled = TRUE))
