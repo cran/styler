@@ -1,7 +1,7 @@
-6e85b4fbe2dc02c4aa6f8b48002f270b *DESCRIPTION
+8d9d629f59558f8b278f76ea104b83f7 *DESCRIPTION
 dd06d679b3382bbe05ae191c65c4662b *LICENSE
 a0ac9596fd8614a96c9fec591771d2c7 *NAMESPACE
-ae51c9572475ac6697a890529fdc332e *NEWS.md
+0677f2e71174e41225b8482baf59b520 *NEWS.md
 5b170a090a7dbe180bbd28ec13675eb3 *R/addins.R
 d00fe26907b91fab42fb4658ebe42bf6 *R/communicate.R
 cfbe0a1141823ea161c3f3df112f4122 *R/compat-dplyr.R
@@ -13,7 +13,7 @@ aadb1cc5123c327404777f7e6dea2309 *R/compat-tidyr.R
 78774083919166686658106b5a570c84 *R/indent.R
 da07d470c953aabe91fa899227b8b737 *R/initialize.R
 da379adb9b1fdd006500d1aa9fde16b3 *R/io.R
-1a42f8fa432cbd85c8cc05ba9642cc29 *R/nest.R
+d9b0ea0f41fc4d6cc53db893ad76e56f *R/nest.R
 a5ac68263336c6f6a7b331ebc27c284c *R/nested-to-tree.R
 6216c19aefe0e3cab001601a49d2a6f9 *R/parse.R
 810bbc0d9212940f610b741b5b967fe1 *R/reindent.R
@@ -42,14 +42,14 @@ ce4864d0d958bfe068ceccaa840f1dcc *R/transform-files.R
 6d3856176dba759007670c553cae70ec *R/ui-caching.R
 677e0f2bfd045c4b83a54f5681e5ba2e *R/ui-styling.R
 078c715c0a550ad9a1e8a486acca56cb *R/unindent.R
-7f2ae79b7916f0dce790b062db6756e4 *R/utils-cache.R
+5a1350d3936b3a93be2f584dfe87c3cb *R/utils-cache.R
 9091ac01e7cc6fbb73dde64ef741c3dd *R/utils-files.R
 82eefae3d030fceedd216b1ba3c9f2ef *R/utils-navigate-nest.R
 254dfec3035a9be73abdad3e54795283 *R/utils-strings.R
 9f1bdf52f8da53ae6689f94abf4f86f0 *R/utils.R
 364ad0f054514102f302b6312440f1e0 *R/vertical.R
 8ec05570897b41ba0b9a007800f5e0f2 *R/visit.R
-fc76c54470bfbaac0b1d22afe17b7684 *R/zzz.R
+4772409bbda1f9ce335644fedd3ef6c3 *R/zzz.R
 760d678aef3808f0a0312f4db228b33a *README.md
 d36a362fcdb9981cb12714aa379a7284 *build/vignette.rds
 c7d75707d66a42f4de758cce8ddf9786 *inst/doc/caching.R
@@ -57,7 +57,7 @@ c7d75707d66a42f4de758cce8ddf9786 *inst/doc/caching.R
 f6d3a943ed90118c985902e7eb32e3a1 *inst/doc/caching.html
 f5027231486007623f0cf2f899daa88c *inst/doc/customizing_styler.R
 fd2f834b5c9347538dccd31ffbae0247 *inst/doc/customizing_styler.Rmd
-763c953af578882d7d5fc7a68edb5fd6 *inst/doc/customizing_styler.html
+382877d50c1a876725ae2474b0b023bf *inst/doc/customizing_styler.html
 a8724b7d39f8ac9cd3acb63e07a7a82a *inst/doc/detect-alignment.R
 76b94d98e77d3ebfdf28148280cd12b0 *inst/doc/detect-alignment.Rmd
 9deb69e5511e6e26ada7785a5b4d4431 *inst/doc/detect-alignment.html
@@ -110,7 +110,7 @@ d15c6dcdba1c70a93f62072bcc6a2427 *man/cache_by_expression.Rd
 4b9d5f8318c557887192ff219e31ecc2 *man/cache_info.Rd
 1fb87936d42729f937c8bfca60c3ec48 *man/cache_is_activated.Rd
 1556dd4cad33def4df1c8f1f622f9e3a *man/cache_make_key.Rd
-886fdb37ba59500982a348695eed12e4 *man/cache_more_specs.Rd
+0e5f539fcaf062a56844b77a5849d885 *man/cache_more_specs.Rd
 4c4f89128de4e062b4d9f89396da781b *man/cache_write.Rd
 f0a2cbf62b0a3e3618a06a64cfc9f55c *man/caching.Rd
 5a6dec5387627356e6da3739f10d4b2d *man/calls_sys.Rd
@@ -157,7 +157,7 @@ f15e6da73243a2592693fc96a8ccf94d *man/extract_terminals.Rd
 af2bbb4d8c14ebc6fbbdc0346e2f4fa0 *man/find_block_id.Rd
 a1fcc300e7b6461d01e1e60c80724ee8 *man/find_dont_seqs.Rd
 78d2b148ab31dbc847fbe1dcf58275ab *man/find_line_break_position_in_multiline_call.Rd
-450c5eac1d901156e1dd33b43751dc91 *man/find_pos_id_to_keep.Rd
+324cf149106a7eb980f18fd3c76a28b4 *man/find_pos_id_to_keep.Rd
 a417ae3a5839fc8297f9d77d598aa748 *man/find_start_pos_id.Rd
 dbd8b006a995e2185e794c0e57643d4b *man/find_tokens_to_update.Rd
 197558ca5976cfdf12bf3b6bc41cafc2 *man/fix_quotes.Rd
@@ -215,7 +215,6 @@ ff97a7bb673e8baa8d2fe2ad318bb9f9 *man/rds_to_version.Rd
 3388190581bb699fa1937a2c1921640d *man/relocate_eq_assign.Rd
 116b6a9e291d84a47ceed987ae589ea2 *man/relocate_eq_assign_nest.Rd
 4aac4579ee90ab3c331bc3a367c28125 *man/relocate_eq_assign_one.Rd
-fc6f554019afc3a68b35e60f30ac5752 *man/remind_removing_old_cache.Rd
 92925f414b96ff6833638a2c4870f6b5 *man/remove_dont_mask.Rd
 fe0a2b1dff97146f0386d96676fe329f *man/remove_roxygen_header.Rd
 f3980f303ff083ef8acb460cb076b1e4 *man/rep_char.Rd
