@@ -1,13 +1,13 @@
 #' Standardize text for hashing
 #'
 #' Make sure text after styling results in the same hash as text before styling
-#' if it is indeed identical.
+#' if it is indeed identical. This function expects trailing blank lines in
+#' `text` were removed prior to passing it to this function.
 #' @param text A character vector.
 #' @keywords internal
 hash_standardize <- function(text) {
   text %>%
     convert_newlines_to_linebreaks() %>%
-    ensure_last_n_empty() %>%
     enc2utf8() %>%
     paste0(collapse = "\n") %>%
     list()
@@ -24,7 +24,7 @@ hash_standardize <- function(text) {
 is_cached <- function(text,
                       transformers,
                       more_specs,
-                      cache_dir = cache_dir_default()) {
+                      cache_dir = get_cache_dir()) {
   R.cache::generateCache(
     key = cache_make_key(text, transformers, more_specs),
     dirs = cache_dir
@@ -41,7 +41,7 @@ is_cached <- function(text,
 #' @param transformers A list of transformer functions, because we can only
 #'   know if text is already correct if we know which transformer function it
 #'   should be styled with.
-#' @param more_args A named vector coercible to it character that determine the
+#' @param more_specs A named vector coercible to character that determines the
 #'   styling but are style guide independent, such as `include_roxygen_examples`
 #'   or `base_indention`.
 #' @details
@@ -111,7 +111,7 @@ cache_make_key <- function(text, transformers, more_specs) {
 #' @keywords internal
 cache_find_path <- function(cache_name = NULL) {
   cache_name <- cache_get_or_derive_name(cache_name)
-  R.cache::getCachePath(c("styler", cache_name))
+  R.cache::getCachePath(get_cache_dir(cache_name))
 }
 
 #' Check if a cache is activated
@@ -173,7 +173,7 @@ cache_by_expression <- function(text,
 cache_write <- function(text, transformers, more_specs) {
   R.cache::generateCache(
     key = cache_make_key(text, transformers, more_specs),
-    dirs = cache_dir_default()
+    dirs = get_cache_dir()
   ) %>%
     file.create()
 }
@@ -194,8 +194,8 @@ cache_get_or_derive_name <- function(cache_name) {
   cache_name
 }
 
-cache_dir_default <- function() {
-  c("styler", cache_get_name())
+get_cache_dir <- function(cache_name = cache_get_name()) {
+  c(getOption("styler.cache_root", "styler"), cache_name)
 }
 
 

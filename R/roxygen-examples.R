@@ -70,6 +70,8 @@ style_roxygen_code_example_segment <- function(one_dont,
                                                base_indention) {
   if (length(one_dont) < 1L) {
     return(character())
+  } else if (identical(one_dont, "\n")) {
+    return(character(1L))
   }
   dont_seqs <- find_dont_seqs(one_dont)
   split_segments <- split_roxygen_segments(one_dont, unlist(dont_seqs))
@@ -102,6 +104,9 @@ style_roxygen_example_snippet <- function(code_snippet,
     mask <- decomposed$mask
   }
   code_snippet <- post_parse_roxygen(code_snippet)
+  append_empty <- !is_dont &&
+    length(code_snippet) > 1L &&
+    last(code_snippet) == ""
 
   cache_is_active <- cache_is_activated()
   is_cached <- is_cached(
@@ -116,9 +121,12 @@ style_roxygen_example_snippet <- function(code_snippet,
       parse_transform_serialize_r(transformers,
         base_indention = base_indention, warn_empty = FALSE
       )
-  } else {
-    code_snippet <- ensure_last_n_empty(code_snippet, n = 0)
   }
+
+  code_snippet <- ensure_last_n_empty(
+    code_snippet,
+    n = ifelse(append_empty, 1L, 0L)
+  )
 
   if (!is_cached && cache_is_active) {
     cache_write(

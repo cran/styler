@@ -17,6 +17,13 @@ resolve_semicolon <- function(pd) {
 }
 
 add_brackets_in_pipe <- function(pd) {
+  if (!identical(pd$text[next_non_comment(pd, 0L)], "substitute")) {
+    pd$child <- map(pd$child, add_brackets_in_pipe_child)
+  }
+  pd
+}
+
+add_brackets_in_pipe_child <- function(pd) {
   is_pipe <- pd$token %in% c("SPECIAL-PIPE", "PIPE")
   Reduce(add_brackets_in_pipe_one, which(is_pipe), init = pd)
 }
@@ -28,10 +35,21 @@ add_brackets_in_pipe_one <- function(pd, pos) {
     child <- pd$child[[next_non_comment]]
     new_pos_ids <- create_pos_ids(child, 1, after = TRUE, n = 2)
     new_pd <- create_tokens(
-      tokens = c("'('", "')'"),
       texts = c("(", ")"),
+      lag_newlines = rep(0L, 2),
+      spaces = 0,
       pos_ids = new_pos_ids,
-      lag_newlines = rep(0L, 2)
+      token_before = c(child$token[1], "'('"),
+      token_after = c("')'", child$token_after[1]),
+      indention_ref_pos_ids = NA,
+      indents = child$indent[1],
+      tokens = c("'('", "')'"),
+      terminal = TRUE,
+      child = NULL,
+      stylerignore = child$stylerignore[1],
+      # block???
+      block = NA,
+      is_cached = FALSE
     )
     pd$child[[next_non_comment]] <- bind_rows(
       pd$child[[next_non_comment]],

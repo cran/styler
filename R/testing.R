@@ -110,7 +110,7 @@ transform_and_check <- function(in_item, out_item,
                                 write_tree = NA,
                                 out_tree = "_tree", ...) {
   write_tree <- set_arg_write_tree(write_tree)
-  read_in <- xfun::read_utf8(in_item)
+  read_in <- read_utf8_bare(in_item)
   if (write_tree) {
     create_tree(read_in) %>%
       write.table(out_tree,
@@ -171,6 +171,7 @@ style_empty <- function(text, base_indention = 0) {
     # transformer options
     use_raw_indention = FALSE,
     reindention       = specify_reindention(),
+    indent_character  = " ",
     NULL
   )
   transformed_text <- parse_transform_serialize_r(text,
@@ -192,6 +193,7 @@ style_op <- function(text, base_indention = 0) {
     # transformer options
     use_raw_indention = FALSE,
     reindention       = specify_reindention(),
+    indent_character  = " ",
     NULL
   )
 
@@ -337,6 +339,7 @@ activate_testthat_cache <- purrr::partial(cache_activate, "testthat")
 #' @param .local_envir The environment to use for scoping.
 #' @details
 #' * make styler quiet.
+#' @keywords internal
 local_test_setup <- function(cache = FALSE,
                              .local_envir = parent.frame()) {
   current_cache <- cache_info(format = "tabular")

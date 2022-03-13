@@ -41,7 +41,8 @@
 #' # brace expressions go on new line if part of a pipe, in function call...
 #' c(
 #'   data %>%
-#'     filter(bar) %>% {
+#'     filter(bar) %>%
+#'     {
 #'       cor(.$col1, .$col2, use = "complete.obs")
 #'     }
 #' )
@@ -118,6 +119,21 @@ set_line_break_around_comma_and_or <- function(pd, strict) {
 
   pd$lag_newlines[comma_with_line_break_that_can_be_removed_before] <- 0L
   pd$lag_newlines[lag(comma_with_line_break_that_can_be_removed_before)] <- 1L
+
+  comma_with_line_break_that_can_be_moved_two_tokens_left <- which(
+    (pd$token == "EQ_SUB") &
+      (pd$lag_newlines > 0) &
+      (pd$token_before != "COMMENT") &
+      (lag(pd$token) != "'['")
+  )
+
+  pd$lag_newlines[comma_with_line_break_that_can_be_moved_two_tokens_left] <- 0L
+  token_before <- map_int(
+    comma_with_line_break_that_can_be_moved_two_tokens_left,
+    previous_non_comment,
+    pd = pd
+  )
+  pd$lag_newlines[token_before] <- 1L
   pd
 }
 
@@ -348,7 +364,7 @@ set_linebreak_after_ggplot2_plus <- function(pd) {
     is_plus_or_comment_after_plus_before_fun_call <-
       lag(is_plus_raw, next_non_comment - first_plus - 1, default = FALSE) &
         (pd$token_after == "SYMBOL_FUNCTION_CALL" | pd$token_after == "SYMBOL_PACKAGE")
-    if (any(is_plus_or_comment_after_plus_before_fun_call)) {
+    if (any(is_plus_or_comment_after_plus_before_fun_call, na.rm = TRUE)) {
       gg_call <- pd$child[[previous_non_comment(pd, first_plus)]]$child[[1]]
       if (!is.null(gg_call) && isTRUE(gg_call$text[gg_call$token == "SYMBOL_FUNCTION_CALL"] == "ggplot")) {
         plus_without_comment_after <- setdiff(

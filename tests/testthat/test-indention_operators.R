@@ -8,7 +8,7 @@ test_that("pipe is indended correctly", {
 })
 
 test_that("base pipe is indended correctly", {
-  skip_if(getRversion() < 4.1)
+  skip_if(getRversion() < "4.1")
   expect_warning(test_collection("indention_operators",
     "base_pipe",
     transformer = style_text
@@ -140,6 +140,14 @@ test_that("indents eq_formals correctly with various levels of scope", {
     transformer = style_text, scope = "tokens"
   ), NA)
 })
+
+test_that("tilde causes indention and is flattened out", {
+  expect_warning(test_collection("indention_operators",
+    "tilde",
+    transformer = style_text
+  ), NA)
+})
+
 
 test_that("overall", {
   expect_warning(test_collection("indention_operators",

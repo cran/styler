@@ -165,12 +165,12 @@ test_that("styler can style Rmarkdown file", {
 
 test_that("styler handles malformed Rmd file and invalid R code in chunk", {
   capture_output(expect_warning(
-    style_file(testthat_file("public-api", "xyzfile_rmd", "random4.Rmd"), strict = FALSE),
+    style_file(testthat_file("public-api", "xyzfile_rmd", "invalid4.Rmd"), strict = FALSE),
     "3: "
   ))
 
   capture_output(expect_warning(
-    style_file(testthat_file("public-api", "xyzfile_rmd", "random7.Rmd"), strict = FALSE),
+    style_file(testthat_file("public-api", "xyzfile_rmd", "invalid7.Rmd"), strict = FALSE),
     "Malformed file"
   ))
 })
@@ -395,7 +395,7 @@ test_that("dry run options work:", {
   test_dry(test_path("public-api/dry/unstyled.Rmd"), style_file, styled = FALSE)
   test_dry(test_path("public-api/dry/styled.Rmd"), style_file, styled = TRUE)
 
-  ## Rmd
+  ## Rnw
   test_dry(test_path("public-api/dry/unstyled.Rnw"), style_file, styled = FALSE)
   test_dry(test_path("public-api/dry/styled.Rnw"), style_file, styled = TRUE)
 })
@@ -474,4 +474,25 @@ test_that("Can properly determine style_after_saving", {
     expect_silent(op <- save_after_styling_is_active())
     expect_equal(op, FALSE)
   })
+})
+
+test_that("Can display warning on unset styler cache", {
+  withr::local_options(styler.cache_root = NULL)
+  withr::local_seed(7)
+  expect_warning(
+    ask_to_switch_to_non_default_cache_root(ask = TRUE),
+    'options(styler.cache_root = "styler-perm")',
+    fixed = TRUE
+  )
+})
+
+test_that("No sensitive to decimal option", {
+  withr::local_options(OutDec = ",")
+  expect_error(style_text("1"), NA)
+})
+
+test_that("Can display warning on unset styler cache", {
+  withr::local_options(styler.cache_root = "styler-perm")
+  withr::local_seed(7)
+  expect_silent(ask_to_switch_to_non_default_cache_root(ask = TRUE))
 })

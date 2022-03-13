@@ -45,7 +45,7 @@ test_that("line break before comma is removed and placed after comma ", {
 })
 
 test_that("Can handle base R pie", {
-  skip_if(getRversion() < 4.1)
+  skip_if(getRversion() < "4.1")
   expect_warning(test_collection("line_breaks_and_other", "base-pipe-line",
     transformer = style_text
   ), NA)
@@ -60,5 +60,11 @@ test_that("line break added for ggplot2 call", {
 test_that("drop redundant line breaks in assignments", {
   expect_warning(test_collection("line_breaks_and_other", "assignment",
     transformer = style_text, scope = I(c("line_breaks", "tokens"))
+  ), NA)
+})
+
+test_that("line is correctly broken around = ", {
+  expect_warning(test_collection("line_breaks_and_other", "around-eq-sub",
+    transformer = style_text
   ), NA)
 })

@@ -88,7 +88,7 @@ make_transformer <- function(transformers,
   assert_transformers(transformers)
 
   function(text) {
-    text <- trimws(text, which = "right")
+    text <- ensure_last_n_empty(trimws(text, which = "right"), n = 0L)
     should_use_cache <- cache_is_activated()
 
     if (should_use_cache) {
@@ -232,7 +232,7 @@ parse_transform_serialize_r <- function(text,
     return("")
   }
   transformers <- transformers_drop(
-    if (getRversion() < 3.4) text else pd_nested$text[!pd_nested$is_cached],
+    pd_nested$text[!pd_nested$is_cached],
     transformers
   )
 
@@ -246,9 +246,11 @@ parse_transform_serialize_r <- function(text,
     ) %>%
     unlist()
 
-  if (can_verify_roundtrip(transformers)) {
-    verify_roundtrip(text, text_out)
-  }
+  verify_roundtrip(
+    text, text_out,
+    parsable_only = !parse_tree_must_be_identical(transformers)
+  )
+
   text_out <- convert_newlines_to_linebreaks(text_out)
   if (cache_is_activated()) {
     cache_by_expression(text_out, transformers, more_specs = more_specs)
@@ -270,13 +272,17 @@ parse_transform_serialize_r <- function(text,
 #' @keywords internal
 #' @seealso specify_transformers_drop
 transformers_drop <- function(text, transformers) {
-  is_colon <- text == ";"
-  if (any(is_colon)) {
-    # ; can only be parsed when on the same line as other token, not the case
-    # here since text is output of compute_parse_data_nested.
-    text <- c(text[!is_colon], "1;")
+  if (length(text) > 0) {
+    is_colon <- text == ";"
+    if (any(is_colon)) {
+      # ; can only be parsed when on the same line as other token, not the case
+      # here since text is output of compute_parse_data_nested.
+      text <- c(text[!is_colon], "1;")
+    }
+    token <- unique(tokenize(text)$token)
+  } else {
+    token <- character()
   }
-  token <- unique(tokenize(text)$token)
   for (scope in c("line_break", "space", "token", "indention")) {
     rules <- transformers$transformers_drop[[scope]]
     for (rule in names(rules)) {
@@ -345,7 +351,7 @@ apply_transformers <- function(pd_nested, transformers) {
 #' @param transformers The list of transformer functions used for styling.
 #'   Needed for reverse engineering the scope.
 #' @keywords internal
-can_verify_roundtrip <- function(transformers) {
+parse_tree_must_be_identical <- function(transformers) {
   length(transformers$token) == 0
 }
 
@@ -353,10 +359,15 @@ can_verify_roundtrip <- function(transformers) {
 #'
 #' If scope was set to "line_breaks" or lower (compare [tidyverse_style()]),
 #' we can compare the expression before and after styling and return an error if
-#' it is not the same. Note that this method ignores roxygen code examples and
+#' it is not the same.
+#' If that's not possible, a weaker guarantee that we want to give is that the
+#' resulting code is parsable.
+#' @param parsable_only If we should only check for the code to be parsable.
+#' @inheritParams expressions_are_identical
+#' @section Limitation:
+#' Note that this method ignores roxygen code examples and
 #' comments and no verification can be conducted if tokens are in the styling
 #' scope.
-#' @inheritParams expressions_are_identical
 #' @importFrom rlang abort
 #' @examples
 #' styler:::verify_roundtrip("a+1", "a + 1")
@@ -365,8 +376,19 @@ can_verify_roundtrip <- function(transformers) {
 #' styler:::verify_roundtrip("a+1", "b - 3")
 #' }
 #' @keywords internal
-verify_roundtrip <- function(old_text, new_text) {
-  if (!expressions_are_identical(old_text, new_text)) {
+verify_roundtrip <- function(old_text, new_text, parsable_only = FALSE) {
+  if (parsable_only) {
+    rlang::with_handlers(
+      parse_safely(new_text),
+      error = function(e) {
+        rlang::abort(paste0(
+          "Styling resulted in code that isn't parsable. This should not ",
+          "happen. Please file a bug report on GitHub ",
+          "(https://github.com/r-lib/styler/issues) using a reprex."
+        ))
+      }
+    )
+  } else if (!expressions_are_identical(old_text, new_text)) {
     msg <- paste(
       "The expression evaluated before the styling is not the same as the",
       "expression after styling. This should not happen. Please file a",

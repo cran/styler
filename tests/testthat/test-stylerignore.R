@@ -77,6 +77,35 @@ test_that("works with other markers", {
   )
 })
 
+
+test_that("works for multiple markers inline", {
+  withr::local_options(styler.ignore_start = "# noeq", )
+  expect_equal(
+    style_text(c(
+      "1+1",
+      "1+1# noeq",
+      "1+1"
+    )) %>%
+      as.character(),
+    c("1 + 1", "1+1# noeq", "1 + 1")
+  )
+})
+
+
+test_that("works for multiple markers inline on one line", {
+  withr::local_options(styler.ignore_start = "nolint start|styler: off")
+  expect_equal(
+    style_text(c(
+      "1+1",
+      "1+1# nolint start styler: off",
+      "1+1"
+    )) %>%
+      as.character(),
+    c("1 + 1", "1+1# nolint start styler: off", "1 + 1")
+  )
+})
+
+
 test_that("works with other markers", {
   expect_warning(
     withr::with_options(
@@ -117,6 +146,12 @@ test_that("token adding or removing works in stylerignore", {
 
 test_that("no token added or removed in complex case", {
   expect_warning(test_collection("stylerignore", "braces",
+    transformer = style_text
+  ), NA)
+})
+
+test_that("stylerignore sequences are respected in alignment detection", {
+  expect_warning(test_collection("stylerignore", "alignment",
     transformer = style_text
   ), NA)
 })
