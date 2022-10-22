@@ -1,42 +1,3 @@
-# @describeIn update_indention_ref Updates the reference pos_id for all
-#   tokens in `pd_nested` if `pd_nested` contains a function call. Tokens that
-#   start on the same line as the opening parenthesis, are not themselves
-#   function calls or expressions wrapped in curly brackets are re-indented,
-#   that is, they are indented up to the level at which the call ends in
-#   terms of col2. We need to take the last from the first child because calls
-#   like package::function() can have three elements.
-#  @examples
-# \dontrun{
-# # not re-indented
-# call(call(
-#   xyz
-# ))
-# # re-indented
-# call(call(1,
-#           2))
-# }
-# @importFrom purrr map_lgl
-# @importFrom rlang seq2
-# @keywords internal
-# update_indention_ref_fun_call <- function(pd_nested) {
-#   current_is_call <- pd_nested$token_before[2] %in% c("SYMBOL_FUNCTION_CALL")
-#   non_comment <- which(pd_nested$token != "COMMENT")
-#   first_non_comment_after_call <- non_comment[non_comment > 2][1]
-#   if ((current_is_call) &&
-#     pd_nested$lag_newlines[first_non_comment_after_call] == 0) {
-#     candidates <- seq2(3, nrow(pd_nested) - 1)
-#
-#     child_is_call <- map_lgl(pd_nested$child, is_function_call)
-#     child_is_curly_expr <- map_lgl(pd_nested$child, is_curly_expr)
-#     child_is_on_same_line <- cumsum(pd_nested$lag_newlines) == 0
-#     call_on_same_line <- child_is_call & child_is_on_same_line
-#     to_indent <- setdiff(candidates, which(call_on_same_line | child_is_curly_expr))
-#
-#     pd_nested$indention_ref_pos_id[to_indent] <- last(pd_nested$child[[1]]$pos_id)
-#   }
-#   pd_nested
-# }
-
 #' Apply reference indention to tokens
 #'
 #' Applies the reference indention created with functions
@@ -46,7 +7,9 @@
 #' @inheritParams apply_ref_indention_one
 #' @keywords internal
 apply_ref_indention <- function(flattened_pd) {
-  target_tokens <- which(flattened_pd$pos_id %in% flattened_pd$indention_ref_pos_id)
+  target_tokens <- which(
+    flattened_pd$pos_id %in% flattened_pd$indention_ref_pos_id
+  )
   flattened_pd <- Reduce(
     apply_ref_indention_one,
     target_tokens,
@@ -67,9 +30,8 @@ apply_ref_indention <- function(flattened_pd) {
 #' @keywords internal
 apply_ref_indention_one <- function(flattened_pd, target_token) {
   token_to_update <- find_tokens_to_update(flattened_pd, target_token)
-  # udate spaces
+  # update spaces
   copied_spaces <- flattened_pd$col2[target_token]
-  old_spaces <- flattened_pd$lag_spaces[token_to_update[1]]
   shift <- copied_spaces
   flattened_pd$lag_spaces[token_to_update] <-
     flattened_pd$lag_spaces[token_to_update] + shift
@@ -114,8 +76,8 @@ find_tokens_to_update <- function(flattened_pd, target_token) {
 #' expression pattern to be a certain amount of spaces. The rule
 #' is only active for the first tokens on a line.
 #' @param flattened_pd A flattened parse table.
-#' @param pattern A character  with regular expressions to match against the token
-#'   in `flattened_pd`.
+#' @param pattern A character  with regular expressions to match against the
+#'   token in `flattened_pd`.
 #' @param target_indention The desired level of indention of the tokens that
 #'   match `pattern`.
 #' @param comments_only Boolean indicating whether only comments should be
@@ -126,13 +88,13 @@ find_tokens_to_update <- function(flattened_pd, target_token) {
 #' @keywords internal
 set_regex_indention <- function(flattened_pd,
                                 pattern,
-                                target_indention = 0,
+                                target_indention = 0L,
                                 comments_only = TRUE) {
   if (comments_only) {
     cond <- which(
-      (flattened_pd$token == "COMMENT") & (flattened_pd$lag_newlines > 0)
+      (flattened_pd$token == "COMMENT") & (flattened_pd$lag_newlines > 0L)
     )
-    if (length(cond) < 1) {
+    if (length(cond) < 1L) {
       return(flattened_pd)
     }
     to_check <- flattened_pd[cond, ]

@@ -20,9 +20,38 @@ pre_visit <- function(pd_nested, funs) {
   if (is.null(pd_nested)) {
     return()
   }
+  if (length(funs) == 0L) {
+    return(pd_nested)
+  }
   pd_nested <- visit_one(pd_nested, funs)
 
-  pd_nested$child <- map(pd_nested$child, pre_visit, funs = funs)
+  children <- pd_nested$child
+  for (i in seq_along(children)) {
+    child <- children[[i]]
+    if (!is.null(child)) {
+      children[[i]] <- pre_visit(child, funs)
+    }
+  }
+  pd_nested$child <- children
+  pd_nested
+}
+
+#' @rdname visit
+#' @keywords internal
+pre_visit_one <- function(pd_nested, fun) {
+  if (is.null(pd_nested)) {
+    return()
+  }
+  pd_nested <- fun(pd_nested)
+
+  children <- pd_nested$child
+  for (i in seq_along(children)) {
+    child <- children[[i]]
+    if (!is.null(child)) {
+      children[[i]] <- pre_visit_one(child, fun)
+    }
+  }
+  pd_nested$child <- children
   pd_nested
 }
 
@@ -32,9 +61,40 @@ post_visit <- function(pd_nested, funs) {
   if (is.null(pd_nested)) {
     return()
   }
+  if (length(funs) == 0L) {
+    return(pd_nested)
+  }
 
-  pd_nested$child <- map(pd_nested$child, post_visit, funs = funs)
+  children <- pd_nested$child
+  for (i in seq_along(children)) {
+    child <- children[[i]]
+    if (!is.null(child)) {
+      children[[i]] <- post_visit(child, funs)
+    }
+  }
+  pd_nested$child <- children
+
   visit_one(pd_nested, funs)
+}
+
+#' @rdname visit
+#' @keywords internal
+post_visit_one <- function(pd_nested, fun) {
+  if (is.null(pd_nested)) {
+    return()
+  }
+  force(fun)
+
+  children <- pd_nested$child
+  for (i in seq_along(children)) {
+    child <- children[[i]]
+    if (!is.null(child)) {
+      children[[i]] <- post_visit_one(child, fun)
+    }
+  }
+  pd_nested$child <- children
+
+  fun(pd_nested)
 }
 
 #' Transform a flat parse table with a list of transformers
@@ -46,7 +106,10 @@ post_visit <- function(pd_nested, funs) {
 #' @family visitors
 #' @keywords internal
 visit_one <- function(pd_flat, funs) {
-  Reduce(function(x, fun) fun(x), funs, init = pd_flat)
+  for (f in funs) {
+    pd_flat <- f(pd_flat)
+  }
+  pd_flat
 }
 
 #' Propagate context to terminals
@@ -114,7 +177,7 @@ context_towards_terminals <- function(pd_nested,
   )
   ref_pos_id_is_na <- !is.na(pd_nested$indention_ref_pos_id)
   pd_nested$indention_ref_pos_id[!ref_pos_id_is_na] <- outer_indention_refs
-  pd_nested$lag_newlines[1] <- pd_nested$lag_newlines[1] + outer_lag_newlines
+  pd_nested$lag_newlines[1L] <- pd_nested$lag_newlines[1L] + outer_lag_newlines
   pd_nested$spaces[nrow(pd_nested)] <-
     pd_nested$spaces[nrow(pd_nested)] + outer_spaces
   pd_nested
@@ -128,7 +191,8 @@ context_towards_terminals <- function(pd_nested,
 #' @keywords internal
 extract_terminals <- function(pd_nested) {
   bind_rows(
-    ifelse(pd_nested$terminal | pd_nested$is_cached, split(pd_nested, seq_len(nrow(pd_nested))),
+    ifelse(pd_nested$terminal | pd_nested$is_cached,
+      split(pd_nested, seq_len(nrow(pd_nested))),
       pd_nested$child
     )
   )
@@ -164,11 +228,10 @@ enrich_terminals <- function(flattened_pd, use_raw_indention = FALSE) {
   groups <- flattened_pd$line1
   flattened_pd <- flattened_pd %>%
     split(groups) %>%
-    lapply(function(.x) {
+    map_dfr(function(.x) {
       .x$col2 <- cumsum(.x$nchar + .x$lag_spaces)
       .x
-    }) %>%
-    bind_rows()
+    })
   flattened_pd$col1 <- flattened_pd$col2 - flattened_pd$nchar
   flattened_pd
 }
@@ -194,7 +257,7 @@ enrich_terminals <- function(flattened_pd, use_raw_indention = FALSE) {
 #' @keywords internal
 choose_indention <- function(flattened_pd, use_raw_indention) {
   if (!use_raw_indention) {
-    flattened_pd$lag_spaces <- ifelse(flattened_pd$lag_newlines > 0,
+    flattened_pd$lag_spaces <- ifelse(flattened_pd$lag_newlines > 0L,
       flattened_pd$indent,
       flattened_pd$lag_spaces
     )

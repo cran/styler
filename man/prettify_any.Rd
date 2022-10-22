@@ -11,7 +11,7 @@ prettify_any(
   exclude_files,
   exclude_dirs,
   include_roxygen_examples,
-  base_indention = 0,
+  base_indention = 0L,
   dry
 )
 }
@@ -25,8 +25,8 @@ be styled. Case is ignored, and the \code{.} is optional, e.g.
 \code{c(".R", ".Rmd")}, or \code{c("r", "rmd")}. Supported values (after
 standardization) are: "r", "rprofile", "rmd", "rmarkdown", "rnw". Rmarkdown is treated as Rmd.}
 
-\item{recursive}{A logical value indicating whether or not files in subdirectories
-should be styled as well.}
+\item{recursive}{A logical value indicating whether or not files in
+subdirectories should be styled as well.}
 
 \item{exclude_files}{Character vector with paths to files that should be
 excluded from styling.}

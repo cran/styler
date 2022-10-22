@@ -9,22 +9,23 @@ style_dir(
   ...,
   style = tidyverse_style,
   transformers = style(...),
-  filetype = c("R", "Rprofile"),
+  filetype = c("R", "Rprofile", "Rmd", "Rmarkdown", "Rnw", "Qmd"),
   recursive = TRUE,
   exclude_files = NULL,
   exclude_dirs = c("packrat", "renv"),
   include_roxygen_examples = TRUE,
-  base_indention = 0,
+  base_indention = 0L,
   dry = "off"
 )
 }
 \arguments{
 \item{path}{Path to a directory with files to transform.}
 
-\item{...}{Arguments passed on to the \code{style} function.}
+\item{...}{Arguments passed on to the \code{style} function,
+see \code{\link[=tidyverse_style]{tidyverse_style()}} for the default argument.}
 
 \item{style}{A function that creates a style guide to use, by default
-\code{\link[=tidyverse_style]{tidyverse_style()}} (without the parentheses). Not used
+\code{\link{tidyverse_style}}. Not used
 further except to construct the argument \code{transformers}. See
 \code{\link[=style_guides]{style_guides()}} for details.}
 
@@ -37,8 +38,8 @@ be styled. Case is ignored, and the \code{.} is optional, e.g.
 \code{c(".R", ".Rmd")}, or \code{c("r", "rmd")}. Supported values (after
 standardization) are: "r", "rprofile", "rmd", "rmarkdown", "rnw". Rmarkdown is treated as Rmd.}
 
-\item{recursive}{A logical value indicating whether or not files in subdirectories
-of \code{path} should be styled as well.}
+\item{recursive}{A logical value indicating whether or not files in
+sub directories of \code{path} should be styled as well.}
 
 \item{exclude_files}{Character vector with paths to files that should be
 excluded from styling.}
@@ -61,8 +62,9 @@ of styling. "off", the default, writes back if the input and output of
 styling are not identical.}
 }
 \description{
-Performs various substitutions in all \code{.R}, \code{.Rmd}, \code{.Rmarkdown} and/or \code{.Rnw} files
-in a directory (by default only \code{.R} files are styled - see \code{filetype} argument).
+Performs various substitutions in all \code{.R}, \code{.Rmd}, \code{.Rmarkdown}, \code{qmd}
+and/or \code{.Rnw} files in a directory (by default only \code{.R} files are styled -
+see \code{filetype} argument).
 Carefully examine the results after running this function!
 }
 \section{Value}{

@@ -89,7 +89,9 @@ tidyverse_style <- function(scope = "tokens",
   space_manipulators <- if ("spaces" %in% scope) {
     list(
       remove_space_before_closing_paren = remove_space_before_closing_paren,
-      remove_space_before_opening_paren = if (strict) remove_space_before_opening_paren,
+      remove_space_before_opening_paren = if (strict) {
+        remove_space_before_opening_paren
+      },
       add_space_after_for_if_while = add_space_after_for_if_while,
       remove_space_before_comma = remove_space_before_comma,
       style_space_around_math_token = partial(
@@ -153,13 +155,19 @@ tidyverse_style <- function(scope = "tokens",
         partial(
           set_line_break_after_opening_if_call_is_multi_line,
           except_token_after = "COMMENT",
-          except_text_before = c("ifelse", "if_else"), # don't modify line break here
-          force_text_before = c("switch") # force line break after first token
+          # don't modify line break here
+          except_text_before = c("ifelse", "if_else"),
+          force_text_before = "switch" # force line break after first token
         )
       },
-      remove_line_break_in_fun_call = purrr::partial(remove_line_break_in_fun_call, strict = strict),
+      remove_line_break_in_fun_call = purrr::partial(
+        remove_line_break_in_fun_call,
+        strict = strict
+      ),
       add_line_break_after_pipe = if (strict) add_line_break_after_pipe,
-      set_linebreak_after_ggplot2_plus = if (strict) set_linebreak_after_ggplot2_plus
+      set_linebreak_after_ggplot2_plus = if (strict) {
+        set_linebreak_after_ggplot2_plus
+      }
     )
   }
 
@@ -224,7 +232,9 @@ tidyverse_style <- function(scope = "tokens",
       # contain EQ_ASSIGN, and the transformer is falsely removed.
       # compute_parse_data_nested / text_to_flat_pd ('a = 4')
       force_assignment_op = "EQ_ASSIGN",
-      wrap_if_else_while_for_fun_multi_line_in_curly = c("IF", "WHILE", "FOR", "FUNCTION")
+      wrap_if_else_while_for_fun_multi_line_in_curly = c(
+        "IF", "WHILE", "FOR", "FUNCTION"
+      )
     )
   )
 
@@ -305,7 +315,7 @@ tidyverse_style <- function(scope = "tokens",
 #' }
 #' set_line_break_before_curly_opening_style <- function() {
 #'   create_style_guide(
-#'     line_break = tibble::lst(set_line_break_before_curly_opening),
+#'     line_break = list(set_line_break_before_curly_opening),
 #'     style_guide_name = "some-style-guide",
 #'     style_guide_version = "some-version"
 #'   )
@@ -435,7 +445,7 @@ NULL
 #' ))
 #' @export
 specify_reindention <- function(regex_pattern = NULL,
-                                indention = 0,
+                                indention = 0L,
                                 comments_only = TRUE) {
   list(
     regex_pattern = regex_pattern,
@@ -452,7 +462,7 @@ specify_reindention <- function(regex_pattern = NULL,
 #' @export
 tidyverse_reindention <- function() {
   specify_reindention(
-    regex_pattern = NULL, indention = 0, comments_only = TRUE
+    regex_pattern = NULL, indention = 0L, comments_only = TRUE
   )
 }
 
@@ -480,7 +490,7 @@ scope_normalize <- function(scope, name = substitute(scope)) {
 
   if (inherits(scope, "AsIs")) {
     factor(as.character(scope), levels = levels, ordered = TRUE)
-  } else if (length(scope) == 1) {
+  } else if (length(scope) == 1L) {
     scope <- levels[as.logical(rev(cumsum(scope == rev(levels))))]
     factor(scope, levels = levels, ordered = TRUE)
   } else {

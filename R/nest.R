@@ -109,12 +109,12 @@ add_cache_block <- function(pd_nested) {
 #' @keywords internal
 drop_cached_children <- function(pd) {
   if (cache_is_activated()) {
-    pd_parent_first <- pd[order(pd$line1, pd$col1, -pd$line2, -pd$col2, as.integer(pd$terminal)), ]
+    order <- order(pd$line1, pd$col1, -pd$line2, -pd$col2, as.integer(pd$terminal))
+    pd_parent_first <- pd[order, ]
     pos_ids_to_keep <- pd_parent_first %>%
-      split(cumsum(pd_parent_first$parent == 0)) %>%
+      split(cumsum(pd_parent_first$parent == 0L)) %>%
       map(find_pos_id_to_keep) %>%
-      unlist() %>%
-      unname()
+      unlist(use.names = FALSE)
     pd[pd$pos_id %in% pos_ids_to_keep, ]
   } else {
     pd
@@ -124,10 +124,11 @@ drop_cached_children <- function(pd) {
 #' Find the pos ids to keep
 #'
 #' To make a parse table shallow, we must know which ids to keep.
-#' `split(cumsum(pd_parent_first$parent == 0))` above puts comments with negative
-#' parents in the same block as proceeding expressions (but also with positive).
+#' `split(cumsum(pd_parent_first$parent == 0L))` above puts comments with
+#' negative parents in the same block as proceeding expressions (but also with
+#' positive).
 #' `find_pos_id_to_keep()` must hence always keep negative comments. We did not
-#' use `split(cumsum(pd_parent_first$parent < 1))` because then every top-level
+#' use `split(cumsum(pd_parent_first$parent < 1L))` because then every top-level
 #' comment is an expression on its own and processing takes much longer for
 #' typical roxygen annotated code.
 #' @param pd A temporary top level nest where the first expression is always a
@@ -144,7 +145,7 @@ drop_cached_children <- function(pd) {
 #' styler:::get_parse_data(c("", "c(#", "1)", "#"))
 #' @keywords internal
 find_pos_id_to_keep <- function(pd) {
-  if (pd$is_cached[1]) {
+  if (pd$is_cached[1L]) {
     pd$pos_id[pd$parent <= 0]
   } else {
     pd$pos_id
@@ -173,6 +174,7 @@ find_pos_id_to_keep <- function(pd) {
 #' option supports character vectors longer than one and the marker are not
 #' exactly matched, but using a  regular expression, which means you can have
 #' multiple marker on one line, e.g. `# nolint start styler: off`.
+# nolint end
 #' @name stylerignore
 #' @examples
 #' # as long as the order of the markers is correct, the lines are ignored.
@@ -247,13 +249,14 @@ add_terminal_token_after <- function(pd_flat) {
     filter(terminal) %>%
     arrange_pos_id()
 
-  new_tibble(list(
-    pos_id = terminals$pos_id,
-    token_after = lead(terminals$token, default = "")
-  ),
-  nrow = nrow(terminals)
-  ) %>%
-    left_join(pd_flat, ., by = "pos_id")
+  rhs <- new_styler_df(
+    list(
+      pos_id = terminals$pos_id,
+      token_after = lead(terminals$token, default = "")
+    )
+  )
+
+  left_join(pd_flat, rhs, by = "pos_id")
 }
 
 #' @rdname add_token_terminal
@@ -263,14 +266,14 @@ add_terminal_token_before <- function(pd_flat) {
     filter(terminal) %>%
     arrange_pos_id()
 
-  new_tibble(
+  rhs <- new_styler_df(
     list(
       id = terminals$id,
       token_before = lag(terminals$token, default = "")
-    ),
-    nrow = nrow(terminals)
-  ) %>%
-    left_join(pd_flat, ., by = "id")
+    )
+  )
+
+  left_join(pd_flat, rhs, by = "id")
 }
 
 
@@ -289,9 +292,9 @@ add_attributes_caching <- function(pd_flat, transformers, more_specs) {
   pd_flat$block <- rep(NA, nrow(pd_flat))
   pd_flat$is_cached <- rep(FALSE, nrow(pd_flat))
   if (cache_is_activated()) {
-    is_parent <- pd_flat$parent == 0
+    is_parent <- pd_flat$parent == 0L
     pd_flat$is_cached[is_parent] <- map_lgl(
-      pd_flat$text[pd_flat$parent == 0],
+      pd_flat$text[pd_flat$parent == 0L],
       is_cached, transformers,
       more_specs = more_specs
     )
@@ -327,7 +330,7 @@ set_spaces <- function(spaces_after_prefix, force_one) {
 #'  a parent to other tokens (called internal) and such that are not (called
 #'  child). Then, the token in child are joined to their parents in internal
 #'  and all token information of the children is nested into a column "child".
-#'  This is done recursively until we are only left with a nested tibble that
+#'  This is done recursively until we are only left with a nested data frame that
 #'  contains one row: The nested parse table.
 #' @param pd_flat A flat parse table including both terminals and non-terminals.
 #' @seealso [compute_parse_data_nested()]
@@ -335,10 +338,10 @@ set_spaces <- function(spaces_after_prefix, force_one) {
 #' @importFrom purrr map2
 #' @keywords internal
 nest_parse_data <- function(pd_flat) {
-  if (all(pd_flat$parent <= 0)) {
+  if (all(pd_flat$parent <= 0L)) {
     return(pd_flat)
   }
-  pd_flat$internal <- with(pd_flat, (id %in% parent) | (parent <= 0))
+  pd_flat$internal <- with(pd_flat, (id %in% parent) | (parent <= 0L))
   split_data <- split(pd_flat, pd_flat$internal)
 
   child <- split_data$`FALSE`
@@ -348,13 +351,19 @@ nest_parse_data <- function(pd_flat) {
   internal$child <- NULL
 
   child$parent_ <- child$parent
-  joined <-
-    child %>%
-    nest_(., "child", setdiff(names(.), "parent_")) %>%
-    left_join(internal, ., by = c("id" = "parent_"))
-  nested <- joined
-  nested$child <- map2(nested$child, nested$internal_child, combine_children)
-  nested <- nested[, setdiff(names(nested), "internal_child")]
+
+  rhs <- nest_(child, "child", setdiff(names(child), "parent_"))
+
+  nested <- left_join(internal, rhs, by = c("id" = "parent_"))
+
+  children <- nested$child
+  for (i in seq_along(children)) {
+    new <- combine_children(children[[i]], nested$internal_child[[i]])
+    # Work around is.null(new)
+    children[i] <- list(new)
+  }
+  nested$child <- children
+  nested$internal_child <- NULL
   nest_parse_data(nested)
 }
 
@@ -370,7 +379,7 @@ nest_parse_data <- function(pd_flat) {
 #' @keywords internal
 combine_children <- function(child, internal_child) {
   bound <- bind_rows(child, internal_child)
-  if (nrow(bound) == 0) {
+  if (nrow(bound) == 0L) {
     return(NULL)
   }
   bound[order(bound$pos_id), ]

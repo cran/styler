@@ -120,13 +120,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -338,9 +345,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1>Entry-points</h1>
 <p>styler provides the following API to format code:</p>
 <ul>
-<li><p><code>style_file()</code> styles .R, .Rmd .Rnw and .Rprofile
-files.</p></li>
-<li><p><code>style_dir()</code> styles all .R and/or .Rmd files in a
+<li><p><code>style_file()</code> styles <code>.R</code>,
+<code>.qmd</code>, <code>.Rmd</code>, <code>.Rmarkdown</code>,
+<code>.Rnw</code>, and <code>.Rprofile</code> files.</p></li>
+<li><p><code>style_dir()</code> styles all these files in a
 directory.</p></li>
 <li><p><code>style_pkg()</code> styles the source files of an R
 package.</p></li>
@@ -388,7 +396,7 @@ the beginning of each line.</p></li>
 <p>There are two ways to specify the scope of styling.</p>
 <ul>
 <li><p>As a string: In this case all less invasive scope levels are
-implied, e.g. <code>&quot;line_breaks&quot;</code> includes
+implied, e.g. <code>&quot;line_breaks&quot;</code> includes
 <code>&quot;indention&quot;</code>, <code>&quot;spaces&quot;</code>. This is brief and what
 most users need. This is supported in
 <code>styler &gt;= 1.0.0</code>.</p></li>
@@ -508,20 +516,18 @@ identical to the input.</p></li>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">style_file</span>(<span class="st">&quot;code.R&quot;</span>, <span class="at">dry =</span> <span class="st">&quot;on&quot;</span>)</span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<pre><code>Styling  1  files:
- code.R ℹ 
-────────────────────────────────────────
-Status  Count   Legend 
-✓   0   File unchanged.
-ℹ   1   File changed.
-x   0   Styling threw an error.
-────────────────────────────────────────
-Please review the changes carefully!</code></pre>
+<pre><code>#&gt; Styling  1  files:
+#&gt;  code.R ℹ 
+#&gt; ────────────────────────────────────────
+#&gt; Status   Count   Legend 
+#&gt; ✔    0   File unchanged.
+#&gt; ℹ    1   File changed.
+#&gt; ✖    0   Styling threw an error.
+#&gt; ────────────────────────────────────────
+#&gt; Please review the changes carefully!</code></pre>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>out</span></code></pre></div>
-<pre><code># A tibble: 1 × 2
-  file   changed
-  &lt;chr&gt;  &lt;lgl&gt;  
-1 code.R TRUE   </code></pre>
+<pre><code>#&gt;     file changed
+#&gt; 1 code.R    TRUE</code></pre>
 </div>
 <div id="more-configuration-options" class="section level1">
 <h1>More configuration options</h1>
@@ -572,7 +578,7 @@ an unindention rule and set <code>indent_by</code> to 4:</p>
 </div>
 <div id="custom-style-guides" class="section level3">
 <h3>Custom style guides</h3>
-<p>These verse some (not all) configurations exposed in
+<p>These were some (not all) configurations exposed in
 <code>style_file()</code> and friends as well as
 <code>tidyverse_style()</code>. If the above did not give you the
 flexibility you hoped for, your can create your own style guide and

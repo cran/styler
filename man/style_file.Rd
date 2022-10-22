@@ -2,7 +2,7 @@
 % Please edit documentation in R/ui-styling.R
 \name{style_file}
 \alias{style_file}
-\title{Style \code{.R}, \code{.Rmd}, \code{.Rmarkdown} or \code{.Rnw} files}
+\title{Style files with R source code}
 \usage{
 style_file(
   path,
@@ -10,17 +10,19 @@ style_file(
   style = tidyverse_style,
   transformers = style(...),
   include_roxygen_examples = TRUE,
-  base_indention = 0,
+  base_indention = 0L,
   dry = "off"
 )
 }
 \arguments{
-\item{path}{A character vector with paths to files to style.}
+\item{path}{A character vector with paths to files to style. Supported
+extensions: \code{.R}, \code{.Rmd}, \code{.Rmarkdown}, \code{.qmd} and \code{.Rnw}.}
 
-\item{...}{Arguments passed on to the \code{style} function.}
+\item{...}{Arguments passed on to the \code{style} function,
+see \code{\link[=tidyverse_style]{tidyverse_style()}} for the default argument.}
 
 \item{style}{A function that creates a style guide to use, by default
-\code{\link[=tidyverse_style]{tidyverse_style()}} (without the parentheses). Not used
+\code{\link{tidyverse_style}}. Not used
 further except to construct the argument \code{transformers}. See
 \code{\link[=style_guides]{style_guides()}} for details.}
 

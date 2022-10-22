@@ -1,4 +1,4 @@
-context("linebreaking added / removed correctly")
+
 
 test_that("line breaks involing curly brackets", {
   expect_warning(test_collection("line_breaks_and_other", "curly",
@@ -65,6 +65,12 @@ test_that("drop redundant line breaks in assignments", {
 
 test_that("line is correctly broken around = ", {
   expect_warning(test_collection("line_breaks_and_other", "around-eq-sub",
+    transformer = style_text
+  ), NA)
+})
+
+test_that("comments are not moved down after {", {
+  expect_warning(test_collection("line_breaks_and_other", "comment-around-curly",
     transformer = style_text
   ), NA)
 })

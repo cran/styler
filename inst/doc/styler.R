@@ -11,6 +11,8 @@ knitr::knit_engines$set(list(
   }
 ))
 
+options(styler.colored_print.vertical = FALSE)
+
 ## -----------------------------------------------------------------------------
 library(styler)
 style_text("a + b", transformers = tidyverse_style(scope = "indention"))
@@ -54,7 +56,7 @@ styler::style_text(
 "
 )
 
-## -----------------------------------------------------------------------------
+## ---- comment = "#>"----------------------------------------------------------
 out <- withr::with_tempfile(
   "code.R",
   {

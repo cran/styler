@@ -16,8 +16,9 @@ hash_standardize <- function(text) {
 #' Check if text is cached
 #'
 #' This boils down to check if the hash exists at the caching dir as a file.
-#' @param text,transformers,more_specs Passed to [cache_make_key()] to generate
-#'   a key.
+#' @param text Passed to [cache_make_key()] to generate a key.
+#' @param transformers Passed to [cache_make_key()] to generate a key.
+#' @param more_specs Passed to [cache_make_key()] to generate a key.
 #' @param cache_dir The caching directory relative to the `.Rcache` root to
 #'   look for a cached value.
 #' @keywords internal
@@ -157,11 +158,12 @@ cache_by_expression <- function(text,
   }
   # TODO base_indention should be set to 0  on write and on read for expressions
   # (only) to make it possible to use the cache for expressions with different
-  # indention. when not the whole input text is cached, we go trough all expressions and
-  # check if they are cached, if yes, we take the input (from which the indention
+  # indention. when not the whole input text is cached, we go trough all
+  # expressions and check if they are cached, if yes, we take the input (from
+  # which the indention
   # was removed via parse, same as it is in cache_by_expression) and add the
   # base indention.
-  expressions[expressions$parent == 0 & expressions$token != "COMMENT" & !expressions$stylerignore, "text"] %>%
+  expressions[expressions$parent == 0L & expressions$token != "COMMENT" & !expressions$stylerignore, "text"] %>%
     map(~ cache_write(.x, transformers = transformers, more_specs))
 }
 
@@ -178,7 +180,7 @@ cache_write <- function(text, transformers, more_specs) {
     file.create()
 }
 
-styler_version <- unlist(unname(read.dcf("DESCRIPTION")[, "Version"]))
+styler_version <- unlist(unname(read.dcf("DESCRIPTION")[, "Version"]), use.names = FALSE)
 
 cache_get_name <- function() {
   getOption("styler.cache_name")
@@ -204,9 +206,13 @@ get_cache_dir <- function(cache_name = cache_get_name()) {
 #' Syntactic sugar for creating more specs. This is useful when we want to add
 #' more arguments (because we can search for this function in the source code).
 #' @keywords internal
-cache_more_specs <- function(include_roxygen_examples, base_indention) {
+cache_more_specs <- function(include_roxygen_examples,
+                             base_indention) {
   list(
     include_roxygen_examples = include_roxygen_examples,
-    base_indention = base_indention
+    base_indention = base_indention,
+    ignore_alignment = getOption("styler.ignore_alignment", FALSE),
+    ignore_start = getOption("styler.ignore_start", .default_ignore_start),
+    ignore_stop = getOption("styler.ignore_start", .default_ignore_stop)
   )
 }

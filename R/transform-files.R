@@ -11,8 +11,14 @@
 #' styling whether or not it was actually changed (or would be changed when
 #' `dry` is not "off").
 #' @keywords internal
-transform_files <- function(files, transformers, include_roxygen_examples, base_indention, dry) {
-  transformer <- make_transformer(transformers, include_roxygen_examples, base_indention)
+transform_files <- function(files,
+                            transformers,
+                            include_roxygen_examples,
+                            base_indention,
+                            dry) {
+  transformer <- make_transformer(
+    transformers, include_roxygen_examples, base_indention
+  )
   max_char <- min(max(nchar(files), 0), getOption("width"))
   len_files <- length(files)
   if (len_files > 0L && !getOption("styler.quiet", FALSE)) {
@@ -24,7 +30,7 @@ transform_files <- function(files, transformers, include_roxygen_examples, base_
   )
   communicate_summary(changed, max_char)
   communicate_warning(changed, transformers)
-  new_tibble(list(file = files, changed = changed), nrow = len_files)
+  new_styler_df(list(file = files, changed = changed))
 }
 
 #' Transform a file and output a customized message
@@ -60,7 +66,15 @@ transform_file <- function(path,
   }
   changed <- transform_code(path, fun = fun, ..., dry = dry)
 
-  bullet <- ifelse(is.na(changed), "warning", ifelse(changed, "info", "tick"))
+  bullet <- if (is.na(changed)) {
+    "warning"
+  } else {
+    if (changed) {
+      "info"
+    } else {
+      "tick"
+    }
+  }
 
   if (!getOption("styler.quiet", FALSE)) {
     cli::cat_bullet(bullet = bullet)
@@ -111,9 +125,9 @@ make_transformer <- function(transformers,
         ) %>%
         when(
           include_roxygen_examples ~
-          parse_transform_serialize_roxygen(.,
-            transformers = transformers, base_indention = base_indention
-          ),
+            parse_transform_serialize_roxygen(.,
+              transformers = transformers, base_indention = base_indention
+            ),
           ~.
         )
       if (should_use_cache) {
@@ -155,7 +169,9 @@ make_transformer <- function(transformers,
 #' [parse_transform_serialize_r()].
 #' @importFrom purrr map_at flatten_chr
 #' @keywords internal
-parse_transform_serialize_roxygen <- function(text, transformers, base_indention) {
+parse_transform_serialize_roxygen <- function(text,
+                                              transformers,
+                                              base_indention) {
   roxygen_seqs <- identify_start_to_stop_of_roxygen_examples_from_text(text)
   if (length(roxygen_seqs) < 1L) {
     return(text)
@@ -200,7 +216,11 @@ split_roxygen_segments <- function(text, roxygen_examples) {
   active_segment <- as.integer(all_lines %in% roxygen_examples)
   segment_id <- cumsum(abs(c(0L, diff(active_segment)))) + 1L
   separated <- split(text, factor(segment_id))
-  restyle_selector <- ifelse(roxygen_examples[1] == 1L, odd_index, even_index)
+  restyle_selector <- if (roxygen_examples[1L] == 1L) {
+    odd_index
+  } else {
+    even_index
+  }
 
   list(separated = separated, selectors = restyle_selector(separated))
 }
@@ -225,7 +245,7 @@ parse_transform_serialize_r <- function(text,
 
   text <- assert_text(text)
   pd_nested <- compute_parse_data_nested(text, transformers, more_specs)
-  if (nrow(pd_nested) == 0) {
+  if (nrow(pd_nested) == 0L) {
     if (warn_empty) {
       warn("Text to style did not contain any tokens. Returning empty string.")
     }
@@ -236,15 +256,20 @@ parse_transform_serialize_r <- function(text,
     transformers
   )
 
-  text_out <- pd_nested %>%
-    split(pd_nested$block) %>%
-    unname() %>%
-    map2(find_blank_lines_to_next_block(pd_nested),
-      parse_transform_serialize_r_block,
+  pd_split <- unname(split(pd_nested, pd_nested$block))
+  pd_blank <- find_blank_lines_to_next_block(pd_nested)
+
+  text_out <- vector("list", length(pd_split))
+  for (i in seq_along(pd_split)) {
+    text_out[[i]] <- parse_transform_serialize_r_block(
+      pd_split[[i]],
+      pd_blank[[i]],
       transformers = transformers,
       base_indention = base_indention
-    ) %>%
-    unlist()
+    )
+  }
+
+  text_out <- unlist(text_out, use.names = FALSE)
 
   verify_roundtrip(
     text, text_out,
@@ -272,7 +297,7 @@ parse_transform_serialize_r <- function(text,
 #' @keywords internal
 #' @seealso specify_transformers_drop
 transformers_drop <- function(text, transformers) {
-  if (length(text) > 0) {
+  if (length(text) > 0L) {
     is_colon <- text == ";"
     if (any(is_colon)) {
       # ; can only be parsed when on the same line as other token, not the case
@@ -322,7 +347,7 @@ apply_transformers <- function(pd_nested, transformers) {
     pd_nested,
     c(
       transformers$initialize, transformers$line_break, set_multi_line,
-      if (length(transformers$line_break) != 0) update_newlines
+      if (length(transformers$line_break) != 0L) update_newlines
     )
   )
 
@@ -352,7 +377,7 @@ apply_transformers <- function(pd_nested, transformers) {
 #'   Needed for reverse engineering the scope.
 #' @keywords internal
 parse_tree_must_be_identical <- function(transformers) {
-  length(transformers$token) == 0
+  length(transformers$token) == 0L
 }
 
 #' Verify the styling

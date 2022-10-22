@@ -5,11 +5,11 @@
 #' around. Examples are [#187](https://github.com/r-lib/styler/issues/187),
 #' [#216](https://github.com/r-lib/styler/issues/216),
 #' [#100](https://github.com/r-lib/styler/issues/100) and others. With
-#' [#419](https://github.com/r-lib/styler/issues/419), the structure of the parse
-#' data changes and we need to dispatch for older versions. As it is inconvenient
-#' to pass a parser version down in the call stack in various places, the
-#' environment `env_current` is used to store the current version *globally*
-#' but internally.
+#' [#419](https://github.com/r-lib/styler/issues/419), the structure of the
+#' parse data changes and we need to dispatch for older versions. As it is
+#' inconvenient to pass a parser version down in the call stack in various
+#' places, the environment `env_current` is used to store the current version
+#' *globally* but internally.
 #'
 #' We version the parser as follows:
 #'
@@ -58,7 +58,7 @@ parser_version_find <- function(pd) {
 #' @details
 #' * `parser_version`: Needed to dispatch between parser versions, see
 #'   [parser_version_set()] for details.
-#' * `stylerignore`: A tibble with parse data containing tokens that fall within
+#' * `stylerignore`: A data frame with parse data containing tokens that fall within
 #'   a stylerignore sequence. This is used after serializing the flattened
 #'   parse table to apply the initial formatting to these tokens. See
 #'   [stylerignore] for details.

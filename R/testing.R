@@ -37,7 +37,7 @@ test_collection <- function(test, sub_test = NULL,
     full.names = FALSE
   )
 
-  if (length(in_names) < 1) abort("no items to check")
+  if (length(in_names) < 1L) abort("no items to check")
 
   out_names <- construct_out(in_names)
 
@@ -161,7 +161,7 @@ NULL
 #'   transformations but remove EOL spaces and indention due to the way the
 #'   serialization is set up.
 #' @keywords internal
-style_empty <- function(text, base_indention = 0) {
+style_empty <- function(text, base_indention = 0L) {
   transformers <- list(
     # transformer functions
     initialize = default_style_guide_attributes,
@@ -183,12 +183,12 @@ style_empty <- function(text, base_indention = 0) {
 
 #' @describeIn test_transformer Transformations for indention based on operators
 #' @keywords internal
-style_op <- function(text, base_indention = 0) {
+style_op <- function(text, base_indention = 0L) {
   transformers <- list(
     # transformer functions
     initialize        = default_style_guide_attributes,
     line_break        = NULL,
-    space             = partial(indent_op, indent_by = 2),
+    space             = partial(indent_op, indent_by = 2L),
     token             = NULL,
     # transformer options
     use_raw_indention = FALSE,
@@ -212,19 +212,6 @@ style_op <- function(text, base_indention = 0) {
 testthat_file <- function(...) {
   file.path(rprojroot::find_testthat_root_file(), ...)
 }
-
-#' Convert a serialized R object to a certain version.
-#'
-#' Needed to make [testthat::expect_known_value()] work on R < 3.6.
-#' @param path A path to an rds file.
-#' @param version The target version.
-#' @keywords internal
-rds_to_version <- function(path, version = 2) {
-  readRDS(path) %>%
-    saveRDS(path, version = version)
-}
-
-
 
 #' Copy a file to a temporary directory
 #'
@@ -299,12 +286,12 @@ n_times_faster_bench <- function(i, x1, x2, fun, ..., n, clear) {
 #' @keywords internal
 generate_test_samples <- function() {
   gen <- function(x) {
-    if (length(x) == 0) {
+    if (length(x) == 0L) {
       ""
     } else {
       c(
-        paste0(x[1], gen(x[-1])),
-        paste0(x[1], " # comment\n", paste(x[-1], collapse = ""))
+        paste0(x[1L], gen(x[-1L])),
+        paste0(x[1L], " # comment\n", paste(x[-1L], collapse = ""))
       )
     }
   }
@@ -363,7 +350,7 @@ local_test_setup <- function(cache = FALSE,
 }
 
 cache_more_specs_default <- function() {
-  cache_more_specs(include_roxygen_examples = TRUE, base_indention = 0)
+  cache_more_specs(include_roxygen_examples = TRUE, base_indention = 0L)
 }
 
 #' Test `transformers_drop` for consistency
@@ -381,7 +368,7 @@ test_transformers_drop <- function(transformers) {
   purrr::walk2(transformers$transformers_drop, transformers[scopes], function(x, y) {
     # all x must be in y. select the x that are not in y
     diff <- setdiff(names(x), names(y))
-    if (length(diff) > 0) {
+    if (length(diff) > 0L) {
       rlang::abort(paste(
         "transformers_drop specifies exclusion rules for transformers that ",
         "are not in the style guilde. Please add the rule to the style guide ",
@@ -389,4 +376,12 @@ test_transformers_drop <- function(transformers) {
       ))
     }
   })
+}
+
+
+skip_during_parallel <- function() {
+  Sys.getenv("STYLER_TEST_IS_TRULY_PARALLEL", TRUE) %>%
+    toupper() %>%
+    as.logical() %>%
+    testthat::skip_if()
 }

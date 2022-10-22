@@ -251,7 +251,8 @@ the <a href="https://github.com/features/actions">GitHub Action</a> <a href="htt
 CI</em></a> is used. The most convenient way to set this up is via <a href="https://usethis.r-lib.org/reference/tidyverse.html"><code>usethis::use_tidy_github_actions()</code></a>.</p></li>
 <li><p>through the <a href="https://github.com/r-lib/actions/tree/v2-branch/examples#style-package">GitHub
 Action Workflow</a> that triggers <code>styler::style_pkg()</code> on
-changes in source files.</p></li>
+changes in source files. Setting this up is easiest with
+<code>usethis::use_github_action(&quot;style&quot;)</code>.</p></li>
 <li><p>as a formatter for R Markdown without modifying the source. This
 feature is implemented as a code chunk option in knitr. use
 <code>tidy = &quot;styler&quot;</code> in the header of a code chunks
@@ -269,7 +270,7 @@ the following line to your <code>.Rprofile</code> (via
 <code>usethis::edit_r_profile()</code>):
 <code>options(reprex.styler = TRUE)</code>.</p></li>
 <li><p>in the <em>format-all</em> command for Emacs in <a href="https://github.com/lassik/emacs-format-all-the-code">emacs-format-all-the-code</a>.</p></li>
-<li><p>As a <a href="https://jupyterlab-code-formatter.readthedocs.io/en/latest/installation.html#r-code-formatters">Jupyterlab
+<li><p>As a <a href="https://ryantam626.github.io/jupyterlab_code_formatter/index.html">Jupyterlab
 code formatter</a>.</p></li>
 <li><p>for pretty-printing <a href="https://github.com/ropensci/drake">drake</a> workflow data frames
 with <code>drake::drake_plan_source()</code>.</p></li>

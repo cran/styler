@@ -7,7 +7,7 @@
 #' @keywords internal
 set_arg_write_tree <- function(write_tree) {
   if (is.na(write_tree)) {
-    write_tree <- ifelse(is_installed("data.tree"), TRUE, FALSE)
+    write_tree <- is_installed("data.tree")
   } else if (write_tree) {
     assert_data.tree_installation()
   }
@@ -25,10 +25,11 @@ assert_transformers <- function(transformers) {
   no_name <- is.null(transformers$style_guide_name)
   no_version <- is.null(transformers$style_guide_version)
   if (no_name || no_version) {
-    action <- ifelse(utils::packageVersion("styler") >= version_cutoff,
-      "are not supported anymore",
+    action <- if (utils::packageVersion("styler") >= version_cutoff) {
+      "are not supported anymore"
+    } else {
       "depreciated and will be removed in a future version of styler."
-    )
+    }
     message <- paste(
       "Style guides without a name and a version field are",
       action, "\nIf you are a user: Open an issue on",
@@ -71,10 +72,11 @@ set_and_assert_arg_filetype <- function(filetype) {
 #' @importFrom rlang abort
 #' @keywords internal
 assert_filetype <- function(lowercase_filetype) {
-  if (!all(lowercase_filetype %in% c("r", "rmd", "rmarkdown", "rnw", "rprofile"))) {
+  allowed_types <- c("r", "rmd", "rmarkdown", "rnw", "rprofile", "qmd")
+  if (!all(lowercase_filetype %in% allowed_types)) {
     abort(paste(
       "filetype must not contain other values than 'R', 'Rprofile',",
-      "'Rmd', 'Rmarkdown' or 'Rnw' (case is ignored)."
+      "'Rmd', 'Rmarkdown', 'qmd' or 'Rnw' (case is ignored)."
     ))
   }
 }
@@ -84,7 +86,7 @@ assert_filetype <- function(lowercase_filetype) {
 #' @param text The input to style.
 #' @keywords internal
 assert_text <- function(text) {
-  if (length(text) < 1) {
+  if (length(text) < 1L) {
     text <- ""
   }
   text
@@ -98,7 +100,7 @@ assert_text <- function(text) {
 #' @keywords internal
 assert_tokens <- function(tokens) {
   invalid_tokens <- tokens[!(tokens %in% lookup_tokens()$token)]
-  if (length(invalid_tokens) > 0) {
+  if (length(invalid_tokens) > 0L) {
     abort(paste(
       "Token(s)", paste0(invalid_tokens, collapse = ", "), "are invalid.",
       "You can lookup all valid tokens and their text",

@@ -8,7 +8,7 @@
 #'   `NULL`, the option "styler.cache_name" is considered which defaults to
 #'   the version of styler used.
 #' @details
-#' Each version of styler has it's own cache by default, because styling is
+#' Each version of styler has its own cache by default, because styling is
 #' potentially different with different versions of styler.
 #' @param ask Whether or not to interactively ask the user again.
 #' @family cache managers
@@ -61,7 +61,7 @@ NULL
 #'
 #' Gives information about the cache. Note that the size consumed by the cache
 #' will always be displayed as zero because all the cache does is creating an
-#' empty file of size 0 bytes for every cached expression. The innode is
+#' empty file of size 0 bytes for every cached expression. The inode is
 #' excluded from this displayed size but negligible.
 #' @param cache_name The name of the cache for which to show details. If
 #'   `NULL`, the active cache is used. If none is active the cache corresponding
@@ -75,17 +75,18 @@ cache_info <- function(cache_name = NULL, format = "both") {
   rlang::arg_match(format, c("tabular", "lucid", "both"))
   path_cache <- cache_find_path(cache_name)
   files <- list.files(path_cache, full.names = TRUE)
-  file_info <- file.info(files) %>%
-    as_tibble()
-  tbl <- tibble(
+  file_info <- file.info(files)
+
+  tbl <- styler_df(
     n = nrow(file_info),
     size = sum(file_info$size),
     last_modified = suppressWarnings(max(file_info$mtime)),
     created = file.info(path_cache)$ctime,
     location = path_cache,
-    activated = cache_is_activated(cache_name)
+    activated = cache_is_activated(cache_name),
+    stringsAsFactors = FALSE
   )
-  if (format %in% c("lucid", "both")) {
+  if (any(c("lucid", "both") == format)) {
     cat(
       "Size:\t\t", tbl$size, " bytes (", tbl$n, " cached expressions)",
       "\nLast modified:\t", as.character(tbl$last_modified),

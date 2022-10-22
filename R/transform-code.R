@@ -1,8 +1,8 @@
 #' Transform code from R, Rmd or Rnw files
 #'
 #' A wrapper which initiates the styling of
-#' either R, Rmd or Rnw files by passing the relevant transformer function for each
-#' case.
+#' either R, Rmd or Rnw files by passing the relevant transformer function for
+#' each case.
 #'
 #' @inheritParams transform_utf8
 #' @param ... Further arguments passed to [transform_utf8()].
@@ -11,7 +11,7 @@
 transform_code <- function(path, fun, ..., dry) {
   if (is_plain_r_file(path) || is_rprofile_file(path)) {
     transform_utf8(path, fun = fun, ..., dry = dry)
-  } else if (is_rmd_file(path)) {
+  } else if (is_rmd_file(path) || is_qmd_file(path)) {
     transform_utf8(path,
       fun = partial(transform_mixed, transformer_fun = fun, filetype = "Rmd"),
       ..., dry = dry
@@ -29,8 +29,8 @@ transform_code <- function(path, fun, ..., dry) {
 #' Transform mixed contents
 #'
 #' Applies the supplied transformer function to code chunks identified within
-#' an Rmd or Rnw file and recombines the resulting (styled) code chunks with the text
-#' chunks.
+#' an Rmd or Rnw file and recombines the resulting (styled) code chunks with the
+#' text chunks.
 #'
 #' @param transformer_fun A styler transformer function.
 #' @inheritParams separate_chunks
@@ -38,10 +38,23 @@ transform_code <- function(path, fun, ..., dry) {
 #' @keywords internal
 transform_mixed <- function(lines, transformer_fun, filetype) {
   chunks <- separate_chunks(lines, filetype)
-  chunks$r_chunks <- map(chunks$r_chunks, transformer_fun)
-
+  chunks$r_chunks <- map(chunks$r_chunks, transform_mixed_non_empty,
+    transformer_fun = transformer_fun
+  )
   map2(chunks$text_chunks, c(chunks$r_chunks, list(character(0))), c) %>%
     flatten_chr()
+}
+
+#' Ensure for `.Rmd` and friends that a code chunk without code is formatted as
+#' a code chunk without any lines.
+#' @keywords internal
+transform_mixed_non_empty <- function(r_chunk, transformer_fun) {
+  trimmed <- trimws(r_chunk)
+  if (all(trimmed == "") || identical(trimmed, character(0L))) {
+    character(0L)
+  } else {
+    transformer_fun(r_chunk)
+  }
 }
 
 #' Separate chunks within Rmd and Rnw contents
@@ -80,18 +93,23 @@ separate_chunks <- function(lines, filetype) {
 #' @param engine_pattern A regular expression that must match the engine name.
 #' @importFrom rlang abort
 #' @keywords internal
-identify_raw_chunks <- function(lines, filetype, engine_pattern = get_engine_pattern()) {
+identify_raw_chunks <- function(lines,
+                                filetype,
+                                engine_pattern = get_engine_pattern()) {
   pattern <- get_knitr_pattern(filetype)
   if (is.null(pattern$chunk.begin) || is.null(pattern$chunk.end)) {
     abort("Unrecognized chunk pattern!")
   }
 
   if (filetype == "Rmd") {
-    starts <- grep("^[\t >]*```+\\s*\\{([Rr]( *[ ,].*)?)\\}\\s*$", lines, perl = TRUE)
+    starts <- grep(
+      "^[\t >]*```+\\s*\\{([Rr]( *[ ,].*)?)\\}\\s*$", lines,
+      perl = TRUE
+    )
     ends <- grep("^[\t >]*```+\\s*$", lines, perl = TRUE)
-    ends <- purrr::imap_int(starts, ~ ends[which(ends > .x)[1]]) %>%
+    ends <- purrr::imap_int(starts, ~ ends[which(ends > .x)[1L]]) %>%
       stats::na.omit()
-    if (length(starts) != length(ends) || anyDuplicated(ends) != 0) {
+    if (length(starts) != length(ends) || anyDuplicated(ends) != 0L) {
       abort("Malformed file!")
     }
   } else if (filetype == "Rnw") {

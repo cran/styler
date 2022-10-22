@@ -16,11 +16,9 @@ add_attributes_caching(pd_flat, transformers, more_specs)
 \arguments{
 \item{pd_flat}{A flat parse table.}
 
-\item{transformers}{Passed to \code{\link[=cache_make_key]{cache_make_key()}} to generate
-a key.}
+\item{transformers}{Passed to \code{\link[=cache_make_key]{cache_make_key()}} to generate a key.}
 
-\item{more_specs}{Passed to \code{\link[=cache_make_key]{cache_make_key()}} to generate
-a key.}
+\item{more_specs}{Passed to \code{\link[=cache_make_key]{cache_make_key()}} to generate a key.}
 }
 \description{
 Note that this does function must be called in \code{\link[=compute_parse_data_nested]{compute_parse_data_nested()}}
@@ -32,7 +30,7 @@ for cached code, we don't build up the nested structure and leave it shallow
 }
 \section{Functions}{
 \itemize{
-\item \code{add_attributes_caching}: Initializes \code{newlines} and \code{lag_newlines}.
-}}
+\item \code{add_attributes_caching()}: Initializes \code{newlines} and \code{lag_newlines}.
 
+}}
 \keyword{internal}

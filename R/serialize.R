@@ -7,14 +7,14 @@
 #' @keywords internal
 serialize_parse_data_flattened <- function(flattened_pd, indent_character = "") {
   flattened_pd <- apply_stylerignore(flattened_pd)
-  flattened_pd$lag_newlines[1] <- 0L # resolve start_line elsewhere
+  flattened_pd$lag_newlines[1L] <- 0L # resolve start_line elsewhere
   with(
     flattened_pd,
     paste0(
       collapse = "",
       map(lag_newlines, add_newlines),
       map2(
-        ifelse(lag_newlines > 0, indent_character, " "),
+        ifelse(lag_newlines > 0L, indent_character, " "),
         lag_spaces,
         rep_char
       ),

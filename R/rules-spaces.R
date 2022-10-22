@@ -16,9 +16,15 @@ set_space_around_op <- function(pd_flat, strict) {
   if (!any(op_after)) {
     return(pd_flat)
   }
-  if (sum(pd_flat$lag_newlines) > 2 &&
-    is_function_call(pd_flat) &&
-    any(pd_flat$token %in% c("EQ_SUB", "','"))
+
+  sum_lag_newlines <- sum(pd_flat$lag_newlines)
+  if (
+    !getOption("styler.ignore_alignment", FALSE) &&
+      (
+        (is_function_call(pd_flat) && sum_lag_newlines > 2L) ||
+          (is_function_dec(pd_flat) && sum_lag_newlines > 1L)
+      ) &&
+      any(pd_flat$token %in% c("EQ_SUB", "','", "EQ_FORMALS"))
   ) {
     is_on_aligned_line <- token_is_on_aligned_line(pd_flat)
   } else {
@@ -102,20 +108,20 @@ style_space_around_tilde <- function(pd_flat, strict) {
   if (is_symmetric_tilde_expr(pd_flat)) {
     pd_flat <- style_space_around_token(pd_flat,
       strict, "'~'",
-      level_before = 1, level_after = 1
+      level_before = 1L, level_after = 1L
     )
   } else if (is_asymmetric_tilde_expr(pd_flat)) {
     pd_flat <- style_space_around_token(pd_flat,
-      strict = TRUE, "'~'", level_before = 1,
-      level_after = ifelse(nrow(pd_flat$child[[2]]) > 1, 1, 0)
+      strict = TRUE, "'~'", level_before = 1L,
+      level_after = as.integer(nrow(pd_flat$child[[2L]]) > 1L)
     )
   }
   pd_flat
 }
 
 remove_space_after_unary_pm_nested <- function(pd) {
-  if (any(pd$token[1] %in% c("'+'", "'-'"))) {
-    pd$spaces[1] <- 0L
+  if (any(pd$token[1L] %in% c("'+'", "'-'"))) {
+    pd$spaces[1L] <- 0L
   }
 
   pd
@@ -219,11 +225,11 @@ remove_space_before_comma <- function(pd_flat) {
 #' @param pd_flat A flat parse table.
 #' @keywords internal
 set_space_between_levels <- function(pd_flat) {
-  if (pd_flat$token[1] %in% c("FUNCTION", "IF", "WHILE")) {
+  if (pd_flat$token[1L] %in% c("FUNCTION", "IF", "WHILE")) {
     index <- pd_flat$token == "')'" & pd_flat$newlines == 0L
     pd_flat$spaces[index] <- 1L
-  } else if (pd_flat$token[1] == "FOR") {
-    index <- pd_flat$token == "forcond" & pd_flat$newlines == 0
+  } else if (pd_flat$token[1L] == "FOR") {
+    index <- pd_flat$token == "forcond" & pd_flat$newlines == 0L
     pd_flat$spaces[index] <- 1L
   }
   pd_flat
@@ -260,7 +266,7 @@ start_comments_with_space <- function(pd, force_one = FALSE) {
     return(pd)
   }
 
-  comments <- rematch2::re_match(
+  comments <- re_match(
     pd$text[is_comment],
     "^(?<prefix>#+['\\*]*)(?<space_after_prefix> *)(?<text>.*)$"
   )

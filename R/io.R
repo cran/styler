@@ -27,8 +27,11 @@ transform_utf8_one <- function(path, fun, dry) {
     {
       file_with_info <- read_utf8(path)
       # only write back when changed OR when there was a missing newline
-      new <- fun(file_with_info$text)
-      identical_content <- identical(unclass(file_with_info$text), unclass(new))
+      new <- unclass(fun(file_with_info$text))
+      if (identical(new, "")) {
+        new <- character(0)
+      }
+      identical_content <- identical(file_with_info$text, new)
       identical <- identical_content && !file_with_info$missing_EOF_line_break
       if (!identical) {
         if (dry == "fail") {
@@ -85,7 +88,7 @@ read_utf8 <- function(path) {
   } else if (inherits(out, "warning")) {
     list(
       text = read_utf8_bare(path, warn = FALSE),
-      missing_EOF_line_break = grepl("incomplete", out$message)
+      missing_EOF_line_break = grepl("incomplete", out$message, fixed = TRUE)
     )
   }
 }
@@ -97,7 +100,7 @@ read_utf8_bare <- function(con, warn = TRUE) {
   x <- readLines(con, encoding = "UTF-8", warn = warn)
   i <- invalid_utf8(x)
   n <- length(i)
-  if (n > 0) {
+  if (n > 0L) {
     stop(
       c(
         "The file ", con, " is not encoded in UTF-8. ",

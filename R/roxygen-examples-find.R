@@ -11,7 +11,10 @@ identify_start_to_stop_of_roxygen_examples_from_text <- function(text) {
   if (length(starts) < 1L) {
     return(integer())
   }
-  stop_candidates <- grep("(^[^#]|^#'[\\s\t]*@)", text, perl = TRUE)
+  stop_candidates <- which(or(
+    grepl("(^[^#]|^#'[\\s\t]*@)", text, perl = TRUE),
+    grepl("^ *\t*$", text) & grepl("^#' *", lead(text))
+  ))
   stops <- map(starts, match_stop_to_start, stop_candidates) %>%
     flatten_int()
   if (length(stops) < 1L) {
@@ -50,7 +53,6 @@ match_stop_to_start <- function(start, stop_candidates) {
 #' @keywords internal
 find_dont_seqs <- function(bare) {
   dont_openings <- which(bare %in% dont_keywords())
-  dont_type <- bare[dont_openings]
   dont_closings <- map_int(dont_openings + 1L, find_dont_closings, bare = bare)
   map2(dont_openings, dont_closings, seq2)
 }
@@ -64,6 +66,6 @@ find_dont_closings <- function(bare, dont_openings) {
   match_closing <- intersect(
     seq2(dont_openings + 1L, length(bare)),
     which(diff == level_dont - 1L)
-  )[1]
+  )[1L]
   match_closing + 1L
 }

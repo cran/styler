@@ -12,23 +12,23 @@ is_curly_expr <- function(pd) {
   if (is.null(pd)) {
     return(FALSE)
   }
-  pd$token[1] == "'{'"
+  pd$token[1L] == "'{'"
 }
 
 is_for_expr <- function(pd) {
-  pd$token[1] == "FOR"
+  pd$token[1L] == "FOR"
 }
 
 #' @describeIn pd_is Checks whether `pd` contains is a conditional expression.
 #' @keywords internal
 is_cond_expr <- function(pd) {
-  pd$token[1] == "IF"
+  pd$token[1L] == "IF"
 }
 
 #' @describeIn pd_is Checks whether `pd` contains is a while loop.
 #' @keywords internal
 is_while_expr <- function(pd) {
-  pd$token[1] == "WHILE"
+  pd$token[1L] == "WHILE"
 }
 
 #' @describeIn pd_is Checks whether `pd` is a function call.
@@ -37,10 +37,10 @@ is_function_call <- function(pd) {
   if (is.null(pd)) {
     return(FALSE)
   }
-  if (is.na(pd$token_before[2])) {
+  if (is.na(pd$token_before[2L])) {
     return(FALSE)
   }
-  pd$token_before[2] == "SYMBOL_FUNCTION_CALL"
+  pd$token_before[2L] == "SYMBOL_FUNCTION_CALL"
 }
 
 #' @describeIn pd_is Checks whether `pd` is a function declaration.
@@ -49,7 +49,7 @@ is_function_dec <- function(pd) {
   if (is.null(pd)) {
     return(FALSE)
   }
-  pd$token[1] == "FUNCTION"
+  pd$token[1L] == "FUNCTION"
 }
 
 #' @describeIn pd_is Checks for every token whether or not it is a comment.
@@ -75,8 +75,8 @@ is_comment <- function(pd) {
 #' expression (like `~column`), in the second row if it is a symmetric tilde
 #' expression (like `a~b`).
 #' @keywords internal
-is_tilde_expr <- function(pd, tilde_pos = c(1, 2)) {
-  if (is.null(pd) || nrow(pd) == 1) {
+is_tilde_expr <- function(pd, tilde_pos = c(1L, 2L)) {
+  if (is.null(pd) || nrow(pd) == 1L) {
     return(FALSE)
   }
   any(pd$token[tilde_pos] == "'~'")
@@ -84,26 +84,26 @@ is_tilde_expr <- function(pd, tilde_pos = c(1, 2)) {
 
 #' @rdname is_tilde_expr
 is_asymmetric_tilde_expr <- function(pd) {
-  is_tilde_expr(pd, tilde_pos = 1)
+  is_tilde_expr(pd, tilde_pos = 1L)
 }
 
 #' @rdname is_tilde_expr
 is_symmetric_tilde_expr <- function(pd) {
-  is_tilde_expr(pd, tilde_pos = 2)
+  is_tilde_expr(pd, tilde_pos = 2L)
 }
 
 is_subset_expr <- function(pd) {
   if (is.null(pd) || nrow(pd) == 1) {
     return(FALSE)
   }
-  pd$token[2] == "'['"
+  pd$token[2L] %in% subset_token_opening
 }
 
 
 #' Identify comments that are shebangs
 #'
 #' Shebangs should be preserved and no space should be inserted between
-#' \# and !. A comment is a shebang if it is the first top level token
+#' `#` and `!`. A comment is a shebang if it is the first top level token
 #' (identified with `pos_id`) and if it starts with `#!`.
 #' @param pd A parse table.
 #' @examples
@@ -111,9 +111,7 @@ is_subset_expr <- function(pd) {
 #' @keywords internal
 is_shebang <- function(pd) {
   is_first_comment <- pd$pos_id == 1L
-  is_first_comment[is_first_comment] <- grepl(
-    "^#!", pd$text[is_first_comment]
-  )
+  is_first_comment[is_first_comment] <- startsWith(pd$text[is_first_comment], "#!")
   is_first_comment
 }
 
@@ -150,7 +148,7 @@ contains_else_expr <- function(pd) {
 #' @keywords internal
 contains_else_expr_that_needs_braces <- function(pd) {
   else_idx <- which(pd$token == "ELSE")
-  if (length(else_idx) > 0) {
+  if (length(else_idx) > 0L) {
     non_comment_after_else <- next_non_comment(pd, else_idx)
     sub_expr <- pd$child[[non_comment_after_else]]
     # needs braces if NOT if_condition, NOT curly expr

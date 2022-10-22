@@ -11,12 +11,12 @@ alignment_ensure_no_closing_brace <- function(pd_by_line,
     return(pd_by_line)
   }
   last <- last(pd_by_line)
-  if (nrow(last) == 1) {
+  if (nrow(last) == 1L) {
     # can drop last line completely
     pd_by_line[-length(pd_by_line)]
   } else {
     # only drop last elment of last line
-    pd_by_line[[length(pd_by_line)]] <- last[seq2(1, nrow(last) - 1), ]
+    pd_by_line[[length(pd_by_line)]] <- last[seq2(1L, nrow(last) - 1L), ]
     pd_by_line
   }
 }
@@ -32,7 +32,7 @@ alignment_ensure_no_closing_brace <- function(pd_by_line,
 alignment_drop_comments <- function(pd_by_line) {
   map(pd_by_line, function(x) {
     out <- x[x$token != "COMMENT", ]
-    if (nrow(out) < 1) {
+    if (nrow(out) < 1L) {
       return(NULL)
     } else {
       out
@@ -40,6 +40,38 @@ alignment_drop_comments <- function(pd_by_line) {
   }) %>%
     compact()
 }
+
+
+#' Remove last expression
+#'
+#' In a *nest*, if the last token is an `expr`, the *nest* represents either
+#' an if, while or for statement or a function call. We don't call about that
+#' part, in fact it's important to remove it for alignment. See 'Examples'.
+#'
+#' @examples
+#' if (FALSE) {
+#'   call(
+#'     x = 12,
+#'     y =  3,
+#'   )
+#'
+#'   function(a = 33,
+#'            qq = 4) {
+#'     # we don't care about this part for alignment detection
+#'   }
+#' }
+#' @keywords internal
+alignment_drop_last_expr <- function(pds_by_line) {
+  # TODO could be skipped if we know it's not a function dec
+  pd_last_line <- pds_by_line[[length(pds_by_line)]]
+  last_two_lines <- pd_last_line$token[c(nrow(pd_last_line) - 1, nrow(pd_last_line))]
+  if (identical(last_two_lines, c("')'", "expr"))) {
+    pd_last_line <- pd_last_line[-nrow(pd_last_line), ]
+  }
+  pds_by_line[[length(pds_by_line)]] <- pd_last_line
+  pds_by_line
+}
+
 
 #' Ensure last pd has a trailing comma
 #'
@@ -61,8 +93,8 @@ alignment_ensure_trailing_comma <- function(pd_by_line) {
       lag_newlines = 0L,
       spaces = 0L,
       pos_ids = NA,
-      stylerignore = last_pd$stylerignore[1],
-      indents = last_pd$indent[1]
+      stylerignore = last_pd$stylerignore[1L],
+      indents = last_pd$indent[1L]
     )
     tokens$.lag_spaces <- 0
 
@@ -79,14 +111,12 @@ alignment_ensure_trailing_comma <- function(pd_by_line) {
 #' @keywords internal
 alignment_col1_all_named <- function(relevant_pd_by_line) {
   map_lgl(relevant_pd_by_line, function(x) {
-    if (nrow(x) < 3) {
+    if (nrow(x) < 3L) {
       return(FALSE)
     }
-    x$token[3] == "expr" &&
-      x$token[1] %in% c("SYMBOL_SUB", "STR_CONST") &&
-      x$token[2] %in% c(
-        "EQ_SUB", "SPECIAL-IN", "LT", "GT", "EQ", "NE"
-      )
+    x$token[3L] == "expr" &&
+      any(c("SYMBOL_SUB", "STR_CONST", "SYMBOL_FORMALS") == x$token[1L]) &&
+      any(c("EQ_SUB", "EQ_FORMALS", "SPECIAL-IN", "LT", "GT", "EQ", "NE") == x$token[2L])
   }) %>%
     all()
 }
@@ -108,9 +138,9 @@ alignment_serialize_column <- function(relevant_pd_by_line, column) {
 #' @keywords internal
 alignment_serialize_line <- function(relevant_pd_by_line, column) {
   # TODO
-  # better also add lover bound for column. If you already checked up to comma 2,
-  # you don't need to re-construct text again, just check if text between comma 2
-  # and 3 has the same length.
+  # better also add lover bound for column. If you already checked up to
+  # comma 2, you don't need to re-construct text again, just check if text
+  # between comma 2 and 3 has the same length.
   comma_idx <- which(relevant_pd_by_line$token == "','")
   n_cols <- length(comma_idx)
   if (column > n_cols) {
@@ -152,12 +182,12 @@ alignment_serialize <- function(pd_sub) {
 #' @keywords internal
 alignment_has_correct_spacing_around_comma <- function(pd_sub) {
   comma_tokens <- which(pd_sub$token == "','")
-  if (length(comma_tokens) == 0) {
+  if (length(comma_tokens) == 0L) {
     return(TRUE)
   }
   relevant_comma_token <- comma_tokens[seq2(1, length(comma_tokens) - 1L)]
-  correct_spaces_before <- pd_sub$.lag_spaces[relevant_comma_token] == 0
-  correct_spaces_after <- pd_sub$spaces[relevant_comma_token] > 0
+  correct_spaces_before <- pd_sub$.lag_spaces[relevant_comma_token] == 0L
+  correct_spaces_after <- pd_sub$spaces[relevant_comma_token] > 0L
   all(correct_spaces_before) && all(correct_spaces_after)
 }
 
@@ -169,7 +199,7 @@ alignment_has_correct_spacing_around_comma <- function(pd_sub) {
 #' @importFrom rlang seq2
 alignment_has_correct_spacing_around_eq_sub <- function(pd_sub) {
   relevant_eq_sub_token <- which(pd_sub$token == "EQ_SUB")
-  if (length(relevant_eq_sub_token) == 0) {
+  if (length(relevant_eq_sub_token) == 0L) {
     return(TRUE)
   }
 

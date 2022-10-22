@@ -12,8 +12,7 @@
 #' @param pd_nested A nested parse table to partially flatten.
 #' @keywords internal
 flatten_operators <- function(pd_nested) {
-  pd_nested %>%
-    post_visit(c(flatten_operators_one))
+  post_visit_one(pd_nested, flatten_operators_one)
 }
 
 #' Flatten one level of nesting with its child
@@ -27,7 +26,8 @@ flatten_operators <- function(pd_nested) {
 flatten_operators_one <- function(pd_nested) {
   pd_token_left <- c(special_token, "PIPE", math_token, "'$'")
   pd_token_right <- c(
-    special_token, "PIPE", "LEFT_ASSIGN", if (parser_version_get() > 1) "EQ_ASSIGN",
+    special_token, "PIPE", "LEFT_ASSIGN",
+    if (parser_version_get() > 1) "EQ_ASSIGN",
     "'+'", "'-'", "'~'"
   )
   pd_nested %>%
@@ -52,20 +52,25 @@ flatten_operators_one <- function(pd_nested) {
 #'   from left or from right.
 #' @keywords internal
 flatten_pd <- function(pd_nested, token, child_token = token, left = TRUE) {
-  token_pos_candidates <- which(pd_nested$token[-1] %in% token) + 1
-  if (length(token_pos_candidates) == 0) {
+  token_pos_candidates <- which(pd_nested$token[-1L] %in% token) + 1L
+  if (length(token_pos_candidates) == 0L) {
     return(pd_nested)
   }
-  token_pos <- token_pos_candidates[ifelse(left, 1, length(token_pos_candidates))]
+  token_pos_idx <- if (left) {
+    1L
+  } else {
+    length(token_pos_candidates)
+  }
+  token_pos <- token_pos_candidates[token_pos_idx]
   if (left) {
     pos <- previous_non_comment(pd_nested, token_pos)
   } else {
     pos <- next_non_comment(pd_nested, token_pos)
   }
-  if (pos < 1) {
+  if (pos < 1L) {
     return(pd_nested)
   }
-  if (!any(pd_nested$child[[pos]]$token[-1] %in% child_token)) {
+  if (!any(pd_nested$child[[pos]]$token[-1L] %in% child_token)) {
     return(pd_nested)
   }
   bind_with_child(pd_nested, pos)
@@ -97,8 +102,8 @@ wrap_expr_in_expr <- function(pd) {
     pos_ids = create_pos_ids(pd, 1, after = FALSE),
     child = pd,
     terminal = FALSE,
-    stylerignore = pd$stylerignore[1],
-    indents = pd$indent[1]
+    stylerignore = pd$stylerignore[1L],
+    indents = pd$indent[1L]
   )
 }
 
@@ -141,8 +146,7 @@ wrap_expr_in_expr <- function(pd) {
 #' @keywords internal
 relocate_eq_assign <- function(pd) {
   if (parser_version_get() < 2) {
-    pd %>%
-      post_visit(c(relocate_eq_assign_nest))
+    post_visit_one(pd, relocate_eq_assign_nest)
   } else {
     pd
   }
@@ -172,7 +176,7 @@ relocate_eq_assign <- function(pd) {
 #' @keywords internal
 relocate_eq_assign_nest <- function(pd) {
   idx_eq_assign <- which(pd$token == "EQ_ASSIGN")
-  if (length(idx_eq_assign) > 0) {
+  if (length(idx_eq_assign) > 0L) {
     block_id <- find_block_id(pd)
     blocks <- split(pd, block_id)
     pd <- map_dfr(blocks, relocate_eq_assign_one)
@@ -210,7 +214,7 @@ find_block_id <- function(pd) {
 #' @keywords internal
 relocate_eq_assign_one <- function(pd) {
   idx_eq_assign <- which(pd$token == "EQ_ASSIGN")
-  eq_ind <- seq2(idx_eq_assign[1] - 1L, last(idx_eq_assign) + 1L)
+  eq_ind <- seq2(idx_eq_assign[1L] - 1L, last(idx_eq_assign) + 1L)
   # initialize because wrap_expr_in_expr -> create_tokens -> requires it
   pd$indent <- 0
   eq_expr <- pd[eq_ind, ] %>%
@@ -236,9 +240,9 @@ relocate_eq_assign_one <- function(pd) {
 #' @keywords internal
 add_line_col_to_wrapped_expr <- function(pd) {
   if (nrow(pd) > 1) abort("pd must be a wrapped expression that has one row.")
-  pd$line1 <- pd$child[[1]]$line1[1]
-  pd$line2 <- last(pd$child[[1]]$line2)
-  pd$col1 <- pd$child[[1]]$col1[1]
-  pd$col2 <- last(pd$child[[1]]$col2)
+  pd$line1 <- pd$child[[1L]]$line1[1L]
+  pd$line2 <- last(pd$child[[1L]]$line2)
+  pd$col1 <- pd$child[[1L]]$col1[1L]
+  pd$col2 <- last(pd$child[[1L]]$col2)
   pd
 }

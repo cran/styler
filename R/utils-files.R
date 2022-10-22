@@ -13,6 +13,11 @@ is_rnw_file <- function(path) {
   grepl("\\.Rnw$", path, ignore.case = TRUE)
 }
 
+is_qmd_file <- function(path) {
+  grepl("\\.qmd$", path, ignore.case = TRUE)
+}
+
+
 is_unsaved_file <- function(path) {
   path == ""
 }
@@ -24,7 +29,11 @@ is_unsaved_file <- function(path) {
 #' styler:::map_filetype_to_pattern(c(".rMd", "R"))
 #' @keywords internal
 map_filetype_to_pattern <- function(filetype) {
-  paste0("(", paste(set_and_assert_arg_filetype(filetype), collapse = "|"), ")$")
+  paste0(
+    "(",
+    paste(set_and_assert_arg_filetype(filetype), collapse = "|"),
+    ")$"
+  )
 }
 
 #' `dir()`, but without dot-prefix and different defaults
@@ -44,7 +53,7 @@ map_filetype_to_pattern <- function(filetype) {
 #' setdiff("./file.R", "file.R") # you want to standardize first.
 dir_without_. <- function(path, recursive = TRUE, ...) {
   purrr::map(path, dir_without_._one, recursive = recursive, ...) %>%
-    unlist()
+    unlist(use.names = FALSE)
 }
 
 #' `dir()`, but with full names, ignored case, and included hidden files and

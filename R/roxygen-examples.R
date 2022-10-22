@@ -9,7 +9,7 @@
 #' @importFrom purrr map flatten_chr
 #' @keywords internal
 style_roxygen_code_example <- function(example, transformers, base_indention) {
-  example <- split(example, cumsum(grepl("^#' *@examples", example))) # TODO can this handle @examples 1
+  example <- split(example, cumsum(grepl("^#' *@examples", example)))
   purrr::map(
     example, style_roxygen_code_example_one,
     transformers = transformers, base_indention = base_indention
@@ -22,7 +22,9 @@ style_roxygen_code_example <- function(example, transformers, base_indention) {
 #' @param example_one A character vector, one element per line, that contains in
 #'   total at most one example tag.
 #' @keywords internal
-style_roxygen_code_example_one <- function(example_one, transformers, base_indention) {
+style_roxygen_code_example_one <- function(example_one,
+                                           transformers,
+                                           base_indention) {
   bare <- parse_roxygen(example_one)
   one_dont <- split(bare$text, factor(cumsum(bare$text %in% dont_keywords())))
   unmasked <- map(one_dont, style_roxygen_code_example_segment,
@@ -32,7 +34,7 @@ style_roxygen_code_example_one <- function(example_one, transformers, base_inden
     flatten_chr()
   if (bare$example_type == "examplesIf") {
     with_handlers(
-      parse_text(unmasked[1]),
+      parse_text(unmasked[1L]),
       error = function(e) {
         abort(paste0(
           "Could not style condition in `@examplesIf` because it would result ",
@@ -52,9 +54,9 @@ style_roxygen_code_example_one <- function(example_one, transformers, base_inden
 #' contains at most one `\\dontrun{...}` or friends.
 #' We drop all newline characters first because otherwise the code segment
 #' passed to this function was previously parsed with [parse_roxygen()] and
-#' line-breaks in and after the `\\dontrun{...}` are expressed with `"\n"`, which
-#' contradicts to the definition used elsewhere in this package, where every
-#' element in a vector corresponds to a line. These line-breaks don't get
+#' line-breaks in and after the `\\dontrun{...}` are expressed with `"\n"`,
+#' which contradicts to the definition used elsewhere in this package, where
+#' every element in a vector corresponds to a line. These line-breaks don't get
 #' eliminated because they move to the front of a `code_segment` and
 #' `style_text("\n1")` gives `"\n1"`, i.e. trailing newlines are not
 #' eliminated.
@@ -123,10 +125,7 @@ style_roxygen_example_snippet <- function(code_snippet,
       )
   }
 
-  code_snippet <- ensure_last_n_empty(
-    code_snippet,
-    n = ifelse(append_empty, 1L, 0L)
-  )
+  code_snippet <- ensure_last_n_empty(code_snippet, n = as.integer(append_empty))
 
   if (!is_cached && cache_is_active) {
     cache_write(

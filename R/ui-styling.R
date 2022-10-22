@@ -1,19 +1,19 @@
-#' @api
-#' @import tibble
+#' @keywords api
 #' @importFrom magrittr %>%
 NULL
 
 #' Prettify R source code
 #'
 #' Performs various substitutions in all `.R` files in a package
-#' (code and tests). One can also (optionally) style `.Rmd`, `.Rmarkdown` and/or
-#' `.Rnw` files (vignettes and readme) by changing the `filetype` argument.
+#' (code and tests), `.Rmd`, `.Rmarkdown` and/or
+#' `.qmd`, `.Rnw` files (vignettes and readme).
 #' Carefully examine the results after running this function!
 #'
 #' @param pkg Path to a (subdirectory of an) R package.
-#' @param ... Arguments passed on to the `style` function.
+#' @param ... Arguments passed on to the `style` function,
+#'   see [tidyverse_style()] for the default argument.
 #' @param style A function that creates a style guide to use, by default
-#'   [tidyverse_style()] (without the parentheses). Not used
+#'   [`tidyverse_style`]. Not used
 #'   further except to construct the argument `transformers`. See
 #'   [style_guides()] for details.
 #' @param transformers A set of transformer functions. This argument is most
@@ -74,11 +74,11 @@ style_pkg <- function(pkg = ".",
                       ...,
                       style = tidyverse_style,
                       transformers = style(...),
-                      filetype = c("R", "Rprofile"),
-                      exclude_files = "R/RcppExports.R",
+                      filetype = c("R", "Rprofile", "Rmd", "Rmarkdown", "Rnw", "Qmd"),
+                      exclude_files = c("R/RcppExports.R", "R/cpp11.R"),
                       exclude_dirs = c("packrat", "renv"),
                       include_roxygen_examples = TRUE,
-                      base_indention = 0,
+                      base_indention = 0L,
                       dry = "off") {
   pkg_root <- rprojroot::find_package_root_file(path = pkg)
   changed <- withr::with_dir(pkg_root, prettify_pkg(
@@ -161,6 +161,17 @@ prettify_pkg <- function(transformers,
       )
     )
   }
+
+  if ("\\.qmd" %in% filetype_) {
+    vignette_files <- append(
+      vignette_files,
+      dir_without_.(
+        path = ".",
+        pattern = "\\.qmd$"
+      )
+    )
+  }
+
   files <- setdiff(
     c(r_files, rprofile_files, vignette_files, readme),
     exclude_files
@@ -203,7 +214,7 @@ style_text <- function(text,
                        style = tidyverse_style,
                        transformers = style(...),
                        include_roxygen_examples = TRUE,
-                       base_indention = 0) {
+                       base_indention = 0L) {
   transformer <- make_transformer(transformers,
     include_roxygen_examples = include_roxygen_examples,
     base_indention = base_indention
@@ -214,12 +225,13 @@ style_text <- function(text,
 
 #' Prettify arbitrary R code
 #'
-#' Performs various substitutions in all `.R`, `.Rmd`, `.Rmarkdown` and/or `.Rnw` files
-#' in a directory (by default only `.R` files are styled - see `filetype` argument).
+#' Performs various substitutions in all `.R`, `.Rmd`, `.Rmarkdown`, `qmd`
+#' and/or `.Rnw` files in a directory (by default only `.R` files are styled -
+#' see `filetype` argument).
 #' Carefully examine the results after running this function!
 #' @param path Path to a directory with files to transform.
-#' @param recursive A logical value indicating whether or not files in subdirectories
-#'   of `path` should be styled as well.
+#' @param recursive A logical value indicating whether or not files in
+#'   sub directories of `path` should be styled as well.
 #' @param exclude_dirs Character vector with directories to exclude
 #'   (recursively).
 ##' @inheritParams style_pkg
@@ -242,12 +254,12 @@ style_dir <- function(path = ".",
                       ...,
                       style = tidyverse_style,
                       transformers = style(...),
-                      filetype = c("R", "Rprofile"),
+                      filetype = c("R", "Rprofile", "Rmd", "Rmarkdown", "Rnw", "Qmd"),
                       recursive = TRUE,
                       exclude_files = NULL,
                       exclude_dirs = c("packrat", "renv"),
                       include_roxygen_examples = TRUE,
-                      base_indention = 0,
+                      base_indention = 0L,
                       dry = "off") {
   changed <- withr::with_dir(
     path, prettify_any(
@@ -263,8 +275,8 @@ style_dir <- function(path = ".",
 #'
 #' This is a helper function for style_dir.
 #' @inheritParams style_pkg
-#' @param recursive A logical value indicating whether or not files in subdirectories
-#'   should be styled as well.
+#' @param recursive A logical value indicating whether or not files in
+#'   subdirectories should be styled as well.
 #' @keywords internal
 prettify_any <- function(transformers,
                          filetype,
@@ -272,7 +284,7 @@ prettify_any <- function(transformers,
                          exclude_files,
                          exclude_dirs,
                          include_roxygen_examples,
-                         base_indention = 0,
+                         base_indention = 0L,
                          dry) {
   exclude_files <- set_arg_paths(exclude_files)
   exclude_dirs <- exclude_dirs %>%
@@ -290,7 +302,7 @@ prettify_any <- function(transformers,
         recursive = FALSE
       )
   } else {
-    files_other <- c()
+    files_other <- NULL
   }
   transform_files(
     setdiff(c(files_root, files_other), exclude_files),
@@ -298,14 +310,15 @@ prettify_any <- function(transformers,
   )
 }
 
-#' Style `.R`, `.Rmd`, `.Rmarkdown` or `.Rnw` files
+#' Style files with R source code
 #'
 #' Performs various substitutions in the files specified.
 #' Carefully examine the results after running this function!
 #' @section Encoding:
 #' UTF-8 encoding is assumed. Please convert your code to UTF-8 if necessary
 #' before applying styler.
-#' @param path A character vector with paths to files to style.
+#' @param path A character vector with paths to files to style. Supported
+#'   extensions: `.R`, `.Rmd`, `.Rmarkdown`, `.qmd` and `.Rnw`.
 #' @inheritParams style_pkg
 #' @inheritSection transform_files Value
 #' @inheritSection style_pkg Warning
@@ -334,7 +347,7 @@ style_file <- function(path,
                        style = tidyverse_style,
                        transformers = style(...),
                        include_roxygen_examples = TRUE,
-                       base_indention = 0,
+                       base_indention = 0L,
                        dry = "off") {
   path <- set_arg_paths(path)
   changed <- transform_files(path,

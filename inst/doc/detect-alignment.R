@@ -99,7 +99,7 @@ knitr::opts_chunk$set(eval = FALSE)
 #    y = "hhjkjkbew", x = 3
 #  )
 #  
-#  tribble(
+#  tibble::tribble(
 #    ~x,        ~y,
 #    "another", 1:3,
 #    "b",       1211234

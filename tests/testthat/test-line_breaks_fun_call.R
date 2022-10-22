@@ -1,4 +1,4 @@
-context("line breaks for function calls")
+
 test_that("line breaks work in general", {
   expect_warning(test_collection("line_breaks_fun_call",
     "token_dependent_mixed",
@@ -52,6 +52,13 @@ test_that("line breaks work with exceptions", {
 test_that("line breaks work with exceptions", {
   expect_warning(test_collection("line_breaks_fun_call",
     "named_arguments",
+    transformer = style_text
+  ), NA)
+})
+
+test_that("line breaks work with exceptions", {
+  expect_warning(test_collection("line_breaks_fun_call",
+    "unindent",
     transformer = style_text
   ), NA)
 })

@@ -7,15 +7,15 @@
 set_regex_indention(
   flattened_pd,
   pattern,
-  target_indention = 0,
+  target_indention = 0L,
   comments_only = TRUE
 )
 }
 \arguments{
 \item{flattened_pd}{A flattened parse table.}
 
-\item{pattern}{A character  with regular expressions to match against the token
-in \code{flattened_pd}.}
+\item{pattern}{A character  with regular expressions to match against the
+token in \code{flattened_pd}.}
 
 \item{target_indention}{The desired level of indention of the tokens that
 match \code{pattern}.}

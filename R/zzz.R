@@ -1,3 +1,7 @@
+# nocov start
+.default_ignore_start <- "styler: off"
+.default_ignore_stop <- "styler: on"
+
 .onLoad <- function(libname, pkgname) {
   op <- options()
   op.styler <- list(
@@ -5,8 +9,9 @@
     styler.cache_root = NULL,
     styler.cache_name = styler_version,
     styler.colored_print.vertical = TRUE,
-    styler.ignore_start = "styler: off",
-    styler.ignore_stop = "styler: on",
+    styler.ignore_alignment = FALSE,
+    styler.ignore_start = .default_ignore_start,
+    styler.ignore_stop = .default_ignore_stop,
     styler.quiet = FALSE,
     styler.test_dir_writable = TRUE
   )
@@ -63,3 +68,5 @@ remove_cache_old_versions <- function() {
     unlink(dir, recursive = TRUE, force = TRUE)
   })
 }
+
+# nocov end
