@@ -1,7 +1,7 @@
 Type: Package
 Package: styler
 Title: Non-Invasive Pretty Printing of R Code
-Version: 1.8.1
+Version: 1.9.0
 Authors@R: 
     c(person(given = "Kirill",
              family = "Müller",
@@ -31,7 +31,7 @@ Suggests: data.tree (>= 0.1.6), digest, dplyr, here, knitr, prettycode,
         testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 Collate: 'addins.R' 'communicate.R' 'compat-dplyr.R' 'compat-tidyr.R'
@@ -42,7 +42,7 @@ Collate: 'addins.R' 'communicate.R' 'compat-dplyr.R' 'compat-tidyr.R'
         'roxygen-examples-find.R' 'roxygen-examples-parse.R'
         'roxygen-examples.R' 'rules-indention.R' 'rules-line-breaks.R'
         'rules-spaces.R' 'rules-tokens.R' 'serialize.R'
-        'set-assert-args.R' 'style-guides.R' 'styler.R'
+        'set-assert-args.R' 'style-guides.R' 'styler-package.R'
         'stylerignore.R' 'testing-mocks.R' 'testing-public-api.R'
         'ui-caching.R' 'testing.R' 'token-create.R' 'transform-block.R'
         'transform-code.R' 'transform-files.R' 'ui-styling.R'
@@ -50,11 +50,11 @@ Collate: 'addins.R' 'communicate.R' 'compat-dplyr.R' 'compat-tidyr.R'
         'utils-navigate-nest.R' 'utils-strings.R' 'utils.R'
         'vertical.R' 'visit.R' 'zzz.R'
 NeedsCompilation: no
-Packaged: 2022-11-07 19:55:47 UTC; lorenz
+Packaged: 2023-01-15 12:38:34 UTC; lorenz
 Author: Kirill Müller [aut] (<https://orcid.org/0000-0002-1416-3412>),
   Lorenz Walthert [cre, aut],
   Indrajeet Patil [ctb] (<https://orcid.org/0000-0003-1995-6531>,
     @patilindrajeets)
 Maintainer: Lorenz Walthert <lorenz.walthert@icloud.com>
 Repository: CRAN
-Date/Publication: 2022-11-07 23:40:02 UTC
+Date/Publication: 2023-01-15 13:10:02 UTC
