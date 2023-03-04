@@ -1,7 +1,7 @@
-6d702de2742164a97e6621831a558972 *DESCRIPTION
+7e3b85ec1429b807ca336823b25f7da1 *DESCRIPTION
 dd06d679b3382bbe05ae191c65c4662b *LICENSE
 b1672134defbe82409a88e8f564cf646 *NAMESPACE
-9e42050dd002e937799ba7c116ae2a7e *NEWS.md
+9d91e4a50e3c9644125a3ae0d4b41b6f *NEWS.md
 e66abbd18096c264c7b166560be3fd80 *R/addins.R
 91950d968d4eb613def76eaffc93ac9f *R/communicate.R
 ad5d5b1c2a60b518e55cb33c3abb800e *R/compat-dplyr.R
@@ -23,7 +23,7 @@ ad8b3fb661ec18bf8a03f813aaa672db *R/relevel.R
 f17d52712225137fbefa08b4953bbb5d *R/roxygen-examples-parse.R
 cbbdfb7f9f16c5836ff8d18a8415cdc8 *R/roxygen-examples.R
 2bac7e1fa42baea48af5a1f1fee74d1a *R/rules-indention.R
-2a557d1a6c33f2b2fb0af6c5de89d0e3 *R/rules-line-breaks.R
+44fd3e48bd4203ab20f326188871a77f *R/rules-line-breaks.R
 50074c51d0b2fc8f06d7cb2a3ef7ea60 *R/rules-spaces.R
 d119cdc56a55ab7a8fc4499d254d3a65 *R/rules-tokens.R
 f5ed211ccddf250913a025eef7ff1510 *R/serialize.R
@@ -38,9 +38,9 @@ a8ad899ea8f0fe715cb47818576eb8a0 *R/testing.R
 b573ca138278f5039371c8964b9672b1 *R/token-define.R
 9afdde068ea2d62584df921869fdc55c *R/transform-block.R
 c2a138dd24fd4f34a263e0cc2c5309fd *R/transform-code.R
-b01ac03990fb3b68f2622c71b90a6d12 *R/transform-files.R
+cf580271d16dbb51ba11aeb69df58578 *R/transform-files.R
 a8e8e14d033baa0ab656f4527e0ef04f *R/ui-caching.R
-8e591e9c491599399b61769efadb8889 *R/ui-styling.R
+a23cb8d7baace69f2752b4752e5b1f6b *R/ui-styling.R
 79e355acbff043fc54b7b827be8c4eb2 *R/unindent.R
 cb0adb253f0b9b7b83e6226edfbc5a3f *R/utils-cache.R
 2b40a5256e5806c047b3727ff5cffac8 *R/utils-files.R
@@ -57,7 +57,7 @@ c4f63a0e0aee0677e5528c5d2c138f7f *inst/doc/caching.R
 b0faad18c27a728ee87a0e79bd27d9bf *inst/doc/caching.html
 ce337420eb2a4320d17ca0d50410504f *inst/doc/customizing_styler.R
 37d4897fe4cf162895b70cc1e344cbdc *inst/doc/customizing_styler.Rmd
-f3377c3924baba6dc9fcc22e149179cd *inst/doc/customizing_styler.html
+31c593e679fa95c33591c0c0d2f6da8e *inst/doc/customizing_styler.html
 4a644cb9b75f1cd4af11009b4dc95287 *inst/doc/detect-alignment.R
 b8be458cadfa9e9710be9ec3a7165a62 *inst/doc/detect-alignment.Rmd
 65d1d5fd2fee330a4462036ecea91ef1 *inst/doc/detect-alignment.html
@@ -66,7 +66,7 @@ b8be458cadfa9e9710be9ec3a7165a62 *inst/doc/detect-alignment.Rmd
 08ac3d0b247fae480e7e2049665552a1 *inst/doc/distribute_custom_style_guides.html
 64211a1a30e75b74400255865ccb8af4 *inst/doc/remove_rules.R
 3f66e0f337c68e9daad6f5465a983885 *inst/doc/remove_rules.Rmd
-c15c8a327ed1f6118f4fcedfb87b34d5 *inst/doc/remove_rules.html
+bf964c3075d99250732eba6c5d6dee99 *inst/doc/remove_rules.html
 2a842656a50d7bc1047ab761de60d50f *inst/doc/strict.R
 752fc888d572155717ec67d9e1572874 *inst/doc/strict.Rmd
 be0dc739797ffd8e3a53bb0639d752b3 *inst/doc/strict.html
@@ -204,8 +204,8 @@ aee0373fe60532ccd0076bb54512667c *man/parse_safely.Rd
 3bc2e8092316a5387ab92f0a92f91e64 *man/pd_is.Rd
 8422dca7135c50b373c4ae7c71eedeff *man/pd_is_multi_line.Rd
 f752aafecf1532ca9f77206059f64e27 *man/post_parse_roxygen.Rd
-cb95767d4ef3b356c303e623ff1a4f97 *man/prettify_any.Rd
-2da5037f0b5038f62772fd49a004869d *man/prettify_pkg.Rd
+522a7083c013f70f334688c024b1ebde *man/prettify_any.Rd
+7461810515c4b5701d253fadf1d62cfb *man/prettify_pkg.Rd
 277238f2ddc487645db8bd5f39d2e982 *man/print.vertical.Rd
 3de0ddebcf58c91ed0b6a89357dd3ceb *man/read_utf8.Rd
 3399f911c37b718497e86758ba16b387 *man/read_utf8_bare.Rd
@@ -241,10 +241,10 @@ c4df2f5e517509caadfd86ef95fc8076 *man/specify_transformers_drop.Rd
 ad89aaa97cc8cc6352386da88733fe7f *man/split_roxygen_segments.Rd
 bc545aa9a76161b71505f1ff580a5201 *man/start_comments_with_space.Rd
 07685aa0c7f10200c85b045a5313f49a *man/style_active_pkg.Rd
-db433330aa3b35e6132165471b427690 *man/style_dir.Rd
+ff92d2766647b855567b1b12e594bee2 *man/style_dir.Rd
 399293b8a006f6ebed006d3f1fcd85f4 *man/style_file.Rd
 899f967a75c4df3c4db6dfc422a6bf3d *man/style_guides.Rd
-92732cc73882856e509cd8a19ebce740 *man/style_pkg.Rd
+2003fe2e3d08c1be8ac118400be950dd *man/style_pkg.Rd
 450a91068ec5c1bd570eb214736550a2 *man/style_roxygen_code_example.Rd
 386a5ca6141d199185503a770960b7ee *man/style_roxygen_code_example_one.Rd
 d28ae9362cf4ea9ec232f092f82efe54 *man/style_roxygen_code_example_segment.Rd
@@ -709,6 +709,8 @@ abe2eb33229cb2e25409875f93f64cb0 *tests/testthat/roxygen-examples-complete/27-no
 3d2f464239c354cf464c29342288e26c *tests/testthat/roxygen-examples-complete/27-no-code-block-after-example-out.R
 a1a2770ca0435acd40797a59dbd62522 *tests/testthat/roxygen-examples-complete/28-end-not-blank-in.R
 84e3a5374c896882a0e422140dc3a945 *tests/testthat/roxygen-examples-complete/28-end-not-blank-out.R
+7e276ff1382998a2b703dbd0c6fa32c6 *tests/testthat/roxygen-examples-complete/29-multiple-empty-lines-in-example-in.R
+3bf447c68bb16fd72f4429e27468b60a *tests/testthat/roxygen-examples-complete/29-multiple-empty-lines-in-example-out.R
 c2150ab444b6d7c0b05006469e40899c *tests/testthat/roxygen-examples-complete/3-one-function-example-not-last-proper-run-in.R
 f5d0d47b47cc0558b8bc254a067c07c3 *tests/testthat/roxygen-examples-complete/3-one-function-example-not-last-proper-run-out.R
 eb8b2764ba6afdf1e0b83d10541b89ea *tests/testthat/roxygen-examples-complete/4-one-function-examples-not-last-proper-run-in.R
@@ -849,7 +851,7 @@ b8e5416e4eee0e76cc625bdd71d33c57 *tests/testthat/test-relocate_eq_assign.R
 73ab1440c8fd90dfcb7c7e1c251bd24a *tests/testthat/test-rmd.R
 7cd5bff7f0254e0129c9dffdd7e864ca *tests/testthat/test-rnw.R
 4ecaeabf9a0395e57049e9388b5f6ced *tests/testthat/test-roundtrip.R
-2baa3d6cf202a1c337db947d8fc10dd9 *tests/testthat/test-roxygen-examples-complete.R
+8ace934fce7c74d3cfb97fc70826f556 *tests/testthat/test-roxygen-examples-complete.R
 e159d4e94a28eb776ea42538c7062809 *tests/testthat/test-roxygen-examples-parse.R
 198486ae71f051bf981d0700d141a2d1 *tests/testthat/test-scope-AsIs.R
 619075f57dfd428748bc5df9214d368d *tests/testthat/test-scope-character.R
@@ -908,7 +910,7 @@ daa05201b5f7e501b6d7f71b1a135dd1 *tests/testthat/unary_spacing/unary_indention-o
 ff302bc2d1aef9f3b0e52107537a81c6 *tests/testthat/unary_spacing/unary_simple-in.R
 5b9020226a63f2c6930c202410bbd1e5 *tests/testthat/unary_spacing/unary_simple-out.R
 38939a2025cc647d30832804340443a2 *tests/testthat/unindention/mixed-double-in.R
-0e0646e0fe9695fe0a9a76ceb7a56dd2 *tests/testthat/unindention/mixed-double-out.R
+ace1b753d13aa6903eceb78c53dd53d1 *tests/testthat/unindention/mixed-double-out.R
 496e1abd929a62c0340956b7abe939d6 *tests/testthat/unindention/mixed-in.R
 5035ea1b447776a09f09197f42e4f6e1 *tests/testthat/unindention/mixed-out.R
 1827671eef592d8cf3094c666e36cc4f *tests/testthat/unindention/unindent_multi_line-in.R

@@ -422,7 +422,7 @@ one:</p>
 ##     pd_flat$spaces[paren_after &amp; (pd_flat$newlines == 0L)] &lt;- 0L
 ##     pd_flat
 ## }
-## &lt;bytecode: 0x7f78c8641088&gt;
+## &lt;bytecode: 0x7fec3df42718&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>As the name says, this function removes spaces after the opening
 parenthesis. But how? Its input is a <em>nest</em>. Since the visitor
@@ -563,7 +563,7 @@ transformers: <code>apply_transformers()</code>:</p>
 ##         outer_indention_refs = NA)
 ##     transformed_absolute_indent
 ## }
-## &lt;bytecode: 0x7f78c88e9430&gt;
+## &lt;bytecode: 0x7fec2c940eb0&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>This means that the order of the styling is clearly defined and it is
 for example not possible to modify line breaks based on spacing, because
@@ -689,7 +689,7 @@ bracket that comes after a curly brace looks as follows:</p>
 ##     pd$lag_newlines[round_after_curly] &lt;- 0L
 ##     pd
 ## }
-## &lt;bytecode: 0x7f78c868b3b0&gt;
+## &lt;bytecode: 0x7fec3dc6ffc8&gt;
 ## &lt;environment: namespace:styler&gt;</code></pre>
 <p>With our example function
 <code>set_line_break_before_curly_opening()</code> we don’t need to
