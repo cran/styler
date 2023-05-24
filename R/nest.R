@@ -21,13 +21,10 @@ compute_parse_data_nested <- function(text,
   parse_data$child <- rep(list(NULL), length(parse_data$text))
   pd_nested <- parse_data %>%
     nest_parse_data() %>%
-    flatten_operators()
+    flatten_operators() %>%
+    add_cache_block()
 
-  if (any(parse_data$token == "EQ_ASSIGN")) {
-    pd_nested <- relocate_eq_assign(pd_nested)
-  }
-
-  pd_nested %>% add_cache_block()
+  pd_nested
 }
 
 #' Creates a flat parse table with minimal initialization
@@ -99,12 +96,12 @@ add_cache_block <- function(pd_nested) {
 shallowify <- function(pd) {
   if (cache_is_activated()) {
     order <- order(pd$line1, pd$col1, -pd$line2, -pd$col2, as.integer(pd$terminal))
-    pd_parent_first <- pd[order, ]
-    pos_ids_to_keep <- pd_parent_first %>%
-      split(cumsum(pd_parent_first$parent == 0L)) %>%
+    pd_parent_first <- vec_slice(pd, order)
+    pd_parent_first_split <- vec_split(pd_parent_first, cumsum(pd_parent_first$parent == 0L))
+    pos_ids_to_keep <- pd_parent_first_split[[2L]] %>%
       map(find_pos_id_to_keep) %>%
       unlist(use.names = FALSE)
-    shallow <- pd[pd$pos_id %in% pos_ids_to_keep, ]
+    shallow <- vec_slice(pd, pd$pos_id %in% pos_ids_to_keep)
     shallow$terminal[shallow$is_cached] <- TRUE
     # all cached expressions need to be marked as terminals because to
     # [apply_stylerignore()], we rely on terminals only.
@@ -330,33 +327,34 @@ set_spaces <- function(spaces_after_prefix, force_one) {
 #' @return A nested parse table.
 #' @keywords internal
 nest_parse_data <- function(pd_flat) {
-  if (all(pd_flat$parent <= 0L)) {
-    return(pd_flat)
+  repeat {
+    if (all(pd_flat$parent <= 0L)) {
+      return(pd_flat)
+    }
+    pd_flat$internal <- with(pd_flat, (id %in% parent) | (parent <= 0L))
+
+    child <- vec_slice(pd_flat, !pd_flat$internal)
+    internal <- vec_slice(pd_flat, pd_flat$internal)
+
+    internal$internal_child <- internal$child
+    internal$child <- NULL
+
+    child$parent_ <- child$parent
+
+    rhs <- nest_(child, "child", setdiff(names(child), "parent_"))
+
+    nested <- left_join(internal, rhs, by = c("id" = "parent_"))
+
+    children <- nested$child
+    for (i in seq_along(children)) {
+      new <- combine_children(children[[i]], nested$internal_child[[i]])
+      # Work around is.null(new)
+      children[i] <- list(new)
+    }
+    nested$child <- children
+    nested$internal_child <- NULL
+    pd_flat <- nested
   }
-  pd_flat$internal <- with(pd_flat, (id %in% parent) | (parent <= 0L))
-  split_data <- split(pd_flat, pd_flat$internal)
-
-  child <- split_data$`FALSE`
-  internal <- split_data$`TRUE`
-
-  internal$internal_child <- internal$child
-  internal$child <- NULL
-
-  child$parent_ <- child$parent
-
-  rhs <- nest_(child, "child", setdiff(names(child), "parent_"))
-
-  nested <- left_join(internal, rhs, by = c("id" = "parent_"))
-
-  children <- nested$child
-  for (i in seq_along(children)) {
-    new <- combine_children(children[[i]], nested$internal_child[[i]])
-    # Work around is.null(new)
-    children[i] <- list(new)
-  }
-  nested$child <- children
-  nested$internal_child <- NULL
-  nest_parse_data(nested)
 }
 
 #' Combine child and internal child
@@ -365,14 +363,14 @@ nest_parse_data <- function(pd_flat) {
 #' the correct order.
 #' @param child A parse table or `NULL`.
 #' @param internal_child A parse table or `NULL`.
-#' @details Essentially, this is a wrapper around [dplyr::bind_rows()], but
-#'   returns `NULL` if the result of [dplyr::bind_rows()] is a data frame with
+#' @details Essentially, this is a wrapper around vctrs::vec_rbind()], but
+#'   returns `NULL` if the result of vctrs::vec_rbind()] is a data frame with
 #'   zero rows.
 #' @keywords internal
 combine_children <- function(child, internal_child) {
-  bound <- bind_rows(child, internal_child)
+  bound <- vec_rbind(child, internal_child)
   if (nrow(bound) == 0L) {
     return(NULL)
   }
-  bound[order(bound$pos_id), ]
+  vec_slice(bound, order(bound$pos_id))
 }

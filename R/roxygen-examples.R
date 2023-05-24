@@ -8,9 +8,9 @@
 #' @inheritSection parse_transform_serialize_roxygen Hierarchy
 #' @keywords internal
 style_roxygen_code_example <- function(example, transformers, base_indention) {
-  example <- split(example, cumsum(grepl("^#' *@examples", example)))
+  example <- vec_split(example, cumsum(grepl("^#' *@examples", example)))
   purrr::map(
-    example, style_roxygen_code_example_one,
+    example[[2L]], style_roxygen_code_example_one,
     transformers = transformers, base_indention = base_indention
   ) %>%
     flatten_chr()
@@ -28,14 +28,14 @@ style_roxygen_code_example_one <- function(example_one,
   example_one <- example_one[example_one != ""]
 
   bare <- parse_roxygen(example_one)
-  one_dont <- split(bare$text, factor(cumsum(bare$text %in% dont_keywords())))
-  unmasked <- map(one_dont, style_roxygen_code_example_segment,
+  one_dont <- vec_split(bare$text, factor(cumsum(bare$text %in% dont_keywords())))
+  unmasked <- map(one_dont[[2L]], style_roxygen_code_example_segment,
     transformers = transformers,
     base_indention = base_indention
   ) %>%
     flatten_chr()
   if (bare$example_type == "examplesIf") {
-    rlang::with_handlers(
+    rlang::try_fetch(
       parse_text(unmasked[1L]),
       error = function(e) {
         abort(paste0(
