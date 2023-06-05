@@ -12,9 +12,12 @@ knitr::knit_engines$set(list(
 ))
 
 options(styler.colored_print.vertical = FALSE)
+styler::cache_deactivate()
 
 ## -----------------------------------------------------------------------------
 library(styler)
+
+## -----------------------------------------------------------------------------
 style_text("a + b", transformers = tidyverse_style(scope = "indention"))
 
 ## ---- results = 'hide'--------------------------------------------------------

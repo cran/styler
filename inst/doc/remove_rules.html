@@ -344,10 +344,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 style, there are multiple ways:</p>
 <ul>
 <li><p>Use the tidyverse style guide, but not with the default options.
-Starting point for this approach is the <a href="https://styler.r-lib.org/reference/tidyverse_style.html">help
-file</a> for the function <code>tidyverse_style()</code>, which returns
-the transformer functions that prettify your code. Most of these options
-are explained in <code>vignette(&quot;styler&quot;)</code>.</p></li>
+Starting point for this approach is the
+<code>help(&quot;tidyverse_style&quot;)</code> for the function
+<code>tidyverse_style()</code>, which returns the transformer functions
+that prettify your code. Most of these options are explained in
+<code>vignette(&quot;styler&quot;)</code>.</p></li>
 <li><p>If you can’t get styler behaving the way you want using the
 arguments of <code>tidyverse_style()</code>, you have another option,
 which is described in a <code>vignette(&quot;customizing_styler&quot;)</code>:
@@ -461,7 +462,7 @@ declaration of this (unexported) function.</p>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     pd$text[to_replace] &lt;- &quot;&lt;-&quot;</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     pd</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7fb3a0c1e9b8&gt;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x12a307d70&gt;</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:styler&gt;</span></span></code></pre></div>
 <p>Next, you simply set that element to <code>NULL</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>transformers<span class="sc">$</span>token<span class="sc">$</span>force_assignment_op <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
@@ -505,7 +506,7 @@ removed by styler.</p>
 <ul>
 <li>Then pinpoint the probable rule type (e.g. line breaks if you want
 less new lines).</li>
-<li>In a local styler clone, add e.g. a <code>return(pd</code> at the
+<li>In a local styler clone, add e.g. a <code>return(pd)</code> at the
 top of the body to deactivate the rule quickly, or add a
 <code>print(pd)</code> or <code>browser()</code> call in the functions
 of that type (e.g. the different functions of

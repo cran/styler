@@ -1,7 +1,7 @@
 Type: Package
 Package: styler
 Title: Non-Invasive Pretty Printing of R Code
-Version: 1.10.0
+Version: 1.10.1
 Authors@R: 
     c(person(given = "Kirill",
              family = "Müller",
@@ -50,11 +50,11 @@ Collate: 'addins.R' 'communicate.R' 'compat-dplyr.R' 'compat-tidyr.R'
         'utils-navigate-nest.R' 'utils-strings.R' 'utils.R'
         'vertical.R' 'visit.R' 'zzz.R'
 NeedsCompilation: no
-Packaged: 2023-05-24 07:34:21 UTC; lorenz
+Packaged: 2023-06-05 14:56:53 UTC; lorenz
 Author: Kirill Müller [aut] (<https://orcid.org/0000-0002-1416-3412>),
   Lorenz Walthert [cre, aut],
   Indrajeet Patil [ctb] (<https://orcid.org/0000-0003-1995-6531>,
     @patilindrajeets)
 Maintainer: Lorenz Walthert <lorenz.walthert@icloud.com>
 Repository: CRAN
-Date/Publication: 2023-05-24 16:20:02 UTC
+Date/Publication: 2023-06-05 15:40:02 UTC

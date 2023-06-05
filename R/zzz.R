@@ -38,7 +38,7 @@ delete_if_cache_directory <- function(path) {
   }
   designated_cache_path <- normalizePath(tools::R_user_dir("R.cache", which = "cache"))
   is_in_tools_cache <- startsWith(path, designated_cache_path)
-  temp_dir <- normalizePath(Sys.getenv("TMPDIR", Sys.getenv("TMP")))
+  temp_dir <- normalizePath(dirname(tempdir()))
   is_in_generic_cache <- startsWith(path, temp_dir)
   if (is_in_tools_cache || is_in_generic_cache) {
     all_files <- list.files(path,
@@ -64,9 +64,9 @@ ask_to_switch_to_non_default_cache_root <- function(ask = interactive()) {
 
 
 ask_to_switch_to_non_default_cache_root_impl <- function() {
-  rlang::inform(paste0(
-    "{styler} cache is cleared after 6 days. ",
-    "See `?styler::caching` to configure differently or silence this message."
+  cli::cli_inform(paste0(
+    "{{styler}} cache is cleared after 6 days. ",
+    "See {.help styler::caching} to configure differently or silence this message."
   ))
 }
 
@@ -76,7 +76,7 @@ remove_old_cache_files <- function() {
     path_version_specific,
     full.names = TRUE, recursive = TRUE
   )
-  date_boundary <- Sys.time() - 60L * 60L * 24L * 6L
+  date_boundary <- Sys.time() - as.difftime(6L, units = "days")
   file.remove(
     all_cached[file.info(all_cached)$mtime < date_boundary]
   )

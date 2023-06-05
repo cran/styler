@@ -3,6 +3,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+styler::cache_deactivate()
+options(styler.colored_print.vertical = FALSE)
 
 ## -----------------------------------------------------------------------------
 styler::specify_transformers_drop(

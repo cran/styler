@@ -1,5 +1,10 @@
 ## ---- include=FALSE-----------------------------------------------------------
-knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(
+  eval = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+styler::cache_deactivate()
 
 ## -----------------------------------------------------------------------------
 #  call(

@@ -1,3 +1,11 @@
+## -----------------------------------------------------------------------------
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(styler.colored_print.vertical = FALSE)
+styler::cache_deactivate()
+
 ## ---- message = FALSE---------------------------------------------------------
 library("styler")
 cache_deactivate()
