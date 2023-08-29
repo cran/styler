@@ -8,8 +8,8 @@ styler::cache_deactivate()
 
 ## ---- message = FALSE---------------------------------------------------------
 library("styler")
+library("magrittr")
 cache_deactivate()
-library("dplyr")
 names(tidyverse_style())
 str(tidyverse_style(), give.attr = FALSE, list.len = 3)
 
@@ -20,12 +20,12 @@ tidyverse_style()$space$remove_space_after_opening_paren
 string_to_format <- "call( 3)"
 pd <- styler:::compute_parse_data_nested(string_to_format) %>%
   styler:::pre_visit_one(default_style_guide_attributes)
-pd$child[[1]] %>%
-  select(token, terminal, text, newlines, spaces)
+
+cols <- c('token', 'terminal', 'text', 'newlines', 'spaces')
+pd$child[[1]][, cols]
 
 ## -----------------------------------------------------------------------------
-styler:::remove_space_after_opening_paren(pd$child[[1]]) %>%
-  select(token, terminal, text, newlines, spaces)
+styler:::remove_space_after_opening_paren(pd$child[[1]])[, cols]
 
 ## -----------------------------------------------------------------------------
 all.equal(
