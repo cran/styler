@@ -6,7 +6,7 @@ knitr::opts_chunk$set(
 options(styler.colored_print.vertical = FALSE)
 styler::cache_deactivate()
 
-## ---- message = FALSE---------------------------------------------------------
+## ----message = FALSE----------------------------------------------------------
 library("styler")
 library("magrittr")
 cache_deactivate()
@@ -89,13 +89,13 @@ set_line_break_before_curly_opening_style <- function() {
 ## -----------------------------------------------------------------------------
 style_text(code, style = set_line_break_before_curly_opening_style)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  a <- function() # comments should remain EOL
 #  {
 #    3
 #  }
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  a <- function() # comments should remain EOL {
 #    3
 #  }
